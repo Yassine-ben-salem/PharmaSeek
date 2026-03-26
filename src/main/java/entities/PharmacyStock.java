@@ -1,13 +1,9 @@
 package entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -16,7 +12,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "pharmacy_stock", schema = "pharmacy-app")
+@Table(name = "stock")
 public class PharmacyStock {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,12 +38,8 @@ public class PharmacyStock {
     private BigDecimal price;
 
 
-    @Column(name = "reservation_delay_minutes")
+    @Column(name = "reservation_delay")
     private Integer reservationDelayMinutes;
-
-
-    @Column(name = "version")
-    private Integer version;
 
 
     @Column(name = "created_at")

@@ -9,6 +9,11 @@ spring:
     password: root
   jpa:
     show-sql: true
+  jackson:
+    time-zone: GMT+1
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      write-dates-as-timestamps: false
   flyway:
     baseline-on-migrate: true
   jwt:

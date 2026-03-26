@@ -64,10 +64,23 @@ public class PharmacyStockService {
     public Optional<PharmacyStockDto> updatePharmacyStock(Long id, PharmacyStockDto pharmacyStockDto) {
         return pharmacyStockRepository.findById(id)
                 .map(existingStock -> {
-                    Pharmacy pharmacy = pharmacyRepository.findById(pharmacyStockDto.getPharmacyId())
-                            .orElseThrow(() -> new IllegalArgumentException("Pharmacy with ID " + pharmacyStockDto.getPharmacyId() + " not found."));
-                    Drug drug = drugRepository.findById(pharmacyStockDto.getDrugId())
-                            .orElseThrow(() -> new IllegalArgumentException("Drug with ID " + pharmacyStockDto.getDrugId() + " not found."));
+                    Long targetPharmacyId = pharmacyStockDto.getPharmacyId() != null ? pharmacyStockDto.getPharmacyId() : existingStock.getPharmacy().getId();
+                    Long targetDrugId = pharmacyStockDto.getDrugId() != null ? pharmacyStockDto.getDrugId() : existingStock.getDrug().getId();
+
+                    pharmacyStockRepository.findByPharmacyIdAndDrugId(targetPharmacyId, targetDrugId)
+                            .ifPresent(duplicate -> {
+                                if (!duplicate.getId().equals(id)) {
+                                    throw new IllegalStateException(
+                                            "Stock already exists for pharmacyId=" + targetPharmacyId
+                                                    + " and drugId=" + targetDrugId
+                                    );
+                                }
+                            });
+
+                    Pharmacy pharmacy = pharmacyRepository.findById(targetPharmacyId)
+                            .orElseThrow(() -> new IllegalArgumentException("Pharmacy with ID " + targetPharmacyId + " not found."));
+                    Drug drug = drugRepository.findById(targetDrugId)
+                            .orElseThrow(() -> new IllegalArgumentException("Drug with ID " + targetDrugId + " not found."));
 
                     existingStock.setPharmacy(pharmacy);
                     existingStock.setDrug(drug);
@@ -80,12 +93,12 @@ public class PharmacyStockService {
                 });
     }
 
-    public ResponseEntity<PharmacyStock> deletePharmacyStock(Long id) {
+    public boolean deletePharmacyStock(Long id) {
         if (pharmacyStockRepository.existsById(id)) {
             pharmacyStockRepository.deleteById(id);
-            return ResponseEntity.status(202).build();
+            return true;
         }
-        return ResponseEntity.notFound().build();
+        return false;
     }
 
     public List<PharmacyStockDto> getPharmacyStockByPharmacyId(Long pharmacyId) {

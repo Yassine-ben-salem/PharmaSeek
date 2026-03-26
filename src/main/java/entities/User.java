@@ -1,26 +1,27 @@
 package entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users", schema = "pharmacy-app")
+@Table(name = "user_account")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
+
+
+    @Column(name = "name")
+    private String name;
 
 
     @Column(name = "email")
@@ -31,12 +32,20 @@ public class User {
     private String password;
 
 
-    @Column(name = "role")
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(name = "phone")
+    private String phone;
 
 
-    @Column(name = "enabled")
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
+
+
+    @Transient
     private Boolean enabled;
 
 
@@ -46,4 +55,12 @@ public class User {
 
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    public Roles getRole() {
+        if (roles == null || roles.isEmpty()) {
+            return null;
+        }
+        String code = roles.iterator().next().getCode();
+        return code == null ? null : Roles.valueOf(code);
+    }
 }

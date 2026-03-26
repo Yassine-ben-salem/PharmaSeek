@@ -1,12 +1,9 @@
 package entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -14,7 +11,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "pharmacies", schema = "pharmacy-app")
+@Table(name = "pharmacy")
 public class Pharmacy {
     @Id
     @Column(name = "id")
@@ -23,20 +20,21 @@ public class Pharmacy {
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id")
-    private User users;
+    private User user;
 
 
     @Column(name = "pharmacy_name")
     private String pharmacyName;
 
 
-    @Column(name = "matricule_fiscale")
-    private String matriculeFiscale;
+    @Column(name = "tax_id")
+    private String taxId;
 
+    @Column(name ="email")
+    private String email;
 
     @Column(name = "address")
     private String address;
-
 
     @Column(name = "latitude")
     private BigDecimal latitude;
@@ -46,16 +44,12 @@ public class Pharmacy {
     private BigDecimal longitude;
 
 
-    @Column(name = "phone")
-    private String phone;
-
-
-    @Column(name = "verified")
-    private Boolean verified;
-
+    @Column(name = "schedule")
+    private String schedule;
 
     @Column(name = "created_at")
     private Instant createdAt;
 
-
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 }

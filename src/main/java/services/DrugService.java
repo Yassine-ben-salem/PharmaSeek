@@ -33,6 +33,7 @@ public class DrugService {
     public DrugDto createDrug(DrugDto drugDto) {
         Drug drug = drugMapper.toDrug(drugDto);
         drug.setCreatedAt(Instant.now());
+        drug.setUpdatedAt(Instant.now());
         Drug savedDrug = drugRepository.save(drug);
         return drugMapper.toDrugDto(savedDrug);
     }
@@ -43,6 +44,7 @@ public class DrugService {
                     existingDrug.setName(drugDto.getName());
                     existingDrug.setDescription(drugDto.getDescription());
                     existingDrug.setRequiresPrescription(drugDto.getRequiresPrescription());
+                    existingDrug.setUpdatedAt(Instant.now());
                     Drug updatedDrug = drugRepository.save(existingDrug);
                     return drugMapper.toDrugDto(updatedDrug);
                 });
