@@ -6,8 +6,7 @@ import lombok.Value;
 public class PharmacyDto {
     Long id;
     String pharmacyName;
-    String matriculeFiscale;
-    String address;
+    String taxId;
     String email;
-    String phone;
+    String address;
 }

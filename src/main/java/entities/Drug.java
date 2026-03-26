@@ -1,12 +1,9 @@
 package entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
@@ -14,7 +11,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "drugs", schema = "pharmacy-app")
+@Table(name = "drug")
 public class Drug {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,12 +26,21 @@ public class Drug {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "bar_code")
+    private String barCode;
+
+    @Column(name = "category")
+    private String category;
+
+    @Column(name = "manufacturer")
+    private String manufacturer;
 
     @Column(name = "requires_prescription")
     private Boolean requiresPrescription;
 
-
     @Column(name = "created_at")
     private Instant createdAt;
 
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 }

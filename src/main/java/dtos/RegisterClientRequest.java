@@ -11,10 +11,6 @@ public class RegisterClientRequest {
     @Size(max = 120, message = "name must be at most 120 characters")
     private String name;
 
-    @NotBlank(message = "CIN is required")
-    @Size(min = 8, max = 8, message = "CIN must be exactly 8 characters")
-    private String cin;
-
     @NotBlank(message = "email is required")
     @Email(message = "email must be valid")
     private String email;

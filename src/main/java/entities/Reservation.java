@@ -1,13 +1,9 @@
 package entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -16,7 +12,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "reservations")
+@Table(name = "reservation")
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,18 +33,20 @@ public class Reservation {
     @Column(name = "status")
     private String status;
 
-    @Column(name = "total_price")
+    @Column(name = "total")
     private BigDecimal totalPrice;
 
 
-    @Column(name = "reserved_at")
+    @Column(name = "reservation_date")
     private Instant reservedAt;
 
-    @Column(name = "expiration_time")
+    @Column(name = "expiration_date")
     private Instant expirationTime;
 
+    @Column(name = "notes")
+    private String notes;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 
 }

@@ -47,7 +47,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/users/**").permitAll()
+                        .requestMatchers("/drugs", "/drugs/**").hasAnyRole("PHARMACY", "ADMIN")
+                        .requestMatchers("/pharmacy-stock", "/pharmacy-stock/**").hasAnyRole("PHARMACY", "ADMIN")
+                        .requestMatchers("/reservations/**").hasAnyRole("CLIENT", "PHARMACY", "ADMIN")
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers("/users/**").hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -64,7 +74,6 @@ public class SecurityConfig {
                     .withUsername(user.getEmail())
                     .password(user.getPassword())
                     .authorities("ROLE_" + user.getRole().name())
-                    .disabled(Boolean.FALSE.equals(user.getEnabled()))
                     .build();
         };
     }

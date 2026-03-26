@@ -1,12 +1,9 @@
 package entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.math.BigDecimal;
 
@@ -14,7 +11,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "reservation_items", schema = "pharmacy-app")
+@Table(name = "reservation_item")
 public class ReservationItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,15 +24,33 @@ public class ReservationItem {
 
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "drug_id")
-    private Drug drug;
+    @JoinColumn(name = "stock_id")
+    private PharmacyStock stock;
 
 
     @Column(name = "quantity")
     private Integer quantity;
 
 
-    @Column(name = "price_at_reservation")
-    private BigDecimal priceAtReservation;
+    @Column(name = "unit_price")
+    private BigDecimal unitPrice;
+
+    @Column(name = "subtotal")
+    private BigDecimal subtotal;
+
+    @Column(name = "created_at")
+    private java.time.Instant createdAt;
+
+    public Drug getDrug() {
+        return stock == null ? null : stock.getDrug();
+    }
+
+    public BigDecimal getPriceAtReservation() {
+        return unitPrice;
+    }
+
+    public void setPriceAtReservation(BigDecimal priceAtReservation) {
+        this.unitPrice = priceAtReservation;
+    }
 
 }

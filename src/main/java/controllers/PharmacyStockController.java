@@ -33,14 +33,14 @@ public class PharmacyStockController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/create")
+    @PostMapping("")
     @PreAuthorize("hasAnyRole('PHARMACY','ADMIN')")
     public ResponseEntity<PharmacyStockDto> createPharmacyStock(@RequestBody PharmacyStockDto pharmacyStockDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(pharmacyStockService.createPharmacyStock(pharmacyStockDto));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('PHARMACY')")
+    @PreAuthorize("hasAnyRole('ADMIN','PHARMACY')")
     public ResponseEntity<PharmacyStockDto> updatePharmacyStock(@PathVariable Long id, @RequestBody PharmacyStockDto pharmacyStockDto) {
         return pharmacyStockService.updatePharmacyStock(id, pharmacyStockDto)
                 .map(ResponseEntity::ok)
@@ -48,9 +48,9 @@ public class PharmacyStockController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('PHARMACY')")
+    @PreAuthorize("hasAnyRole('ADMIN','PHARMACY')")
     public ResponseEntity<Void> deletePharmacyStock(@PathVariable Long id) {
-        if (pharmacyStockService.deletePharmacyStock(id)!=null) {
+        if (pharmacyStockService.deletePharmacyStock(id)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
@@ -63,7 +63,7 @@ public class PharmacyStockController {
     }
 
     @GetMapping("/drug/{drugId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('PHARMACY')")
+    @PreAuthorize("hasAnyRole('ADMIN','PHARMACY')")
     public ResponseEntity<List<PharmacyStockDto>> getPharmacyStockByDrugId(@PathVariable Long drugId) {
         return ResponseEntity.ok(pharmacyStockService.getPharmacyStockByDrugId(drugId));
     }

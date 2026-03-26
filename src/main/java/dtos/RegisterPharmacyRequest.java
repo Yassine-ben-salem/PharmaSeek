@@ -14,8 +14,8 @@ public class RegisterPharmacyRequest {
     @Size(max = 120, message = "pharmacy name must be at most 120 characters")
     private String pharmacyName;
 
-    @NotBlank(message = "matricule fiscal is required")
-    private String matriculeFiscale;
+    @NotBlank(message = "Tax Id is required")
+    private String taxId;
 
     @NotBlank(message="email is required")
     @Email
@@ -24,9 +24,6 @@ public class RegisterPharmacyRequest {
     @NotBlank(message = "address is required")
     private String address;
 
-    @NotBlank(message = "phone is required")
-    @Size(min = 8, max = 8 , message = "phone must be exactly 8 characters")
-    private String phone;
 
     @NotBlank(message = "password is required")
     @Size(min = 8, message = "password must be at least 8 characters")

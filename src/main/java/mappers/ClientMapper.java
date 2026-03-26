@@ -7,7 +7,8 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ClientMapper {
-    @Mapping(target = "name", source = "fullName")
-    @Mapping(target = "email", source = "users.email")
+    @Mapping(target = "name", source = "user.name")
+    @Mapping(target = "email", source = "user.email")
+    @Mapping(target = "phone", source = "user.phone")
     ClientDto toClientDto(Client client);
 }
