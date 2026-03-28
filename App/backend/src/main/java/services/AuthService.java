@@ -3,6 +3,7 @@ package services;
 import config.JwtConfig;
 import dtos.*;
 import entities.Client;
+import entities.PasswordResetToken;
 import entities.Pharmacy;
 import entities.Role;
 import entities.Roles;
@@ -25,15 +26,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repositories.ClientRepository;
+import repositories.PasswordResetTokenRepository;
 import repositories.PharmacyRepository;
 import repositories.RoleRepository;
 import repositories.UserRepository;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -50,6 +54,8 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PharmacyMapper pharmacyMapper;
     private final AuthenticationManager authenticationManager;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailService emailService;
 
 
     public JwtResponse generateAuthResponse(User user, HttpServletResponse response) {
@@ -231,5 +237,45 @@ public class AuthService {
         cookie.setMaxAge(0);
         cookie.setSecure(jwtConfig.isSecureCookie());
         response.addCookie(cookie);
+    }
+
+    @Transactional
+    public void forgotPassword(String email) {
+        var userOptional = userRepository.findByEmail(email.toLowerCase().trim());
+        if (userOptional.isEmpty()) {
+            return; // Keep response generic to avoid account enumeration.
+        }
+
+        User user = userOptional.get();
+        passwordResetTokenRepository.deleteByUser(user);
+
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setExpiryDate(LocalDateTime.now().plusHours(1));
+        resetToken.setCreatedAt(LocalDateTime.now());
+        passwordResetTokenRepository.save(resetToken);
+
+        String resetLink = "http://localhost:4200/reset-password?token=" + token;
+        emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+    }
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
+
+        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new IllegalArgumentException("Token has expired");
+        }
+
+        User user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setUpdatedAt(Instant.now());
+        userRepository.save(user);
+
+        passwordResetTokenRepository.delete(resetToken);
     }
 }
