@@ -128,13 +128,13 @@
 }
 
 .btn-login {
-    color: var(--text-primary);
-    background: transparent;
+    color: white;
+    background: var(--accent-primary);
 }
 
 .btn-login:hover {
-    color: var(--accent-primary);
-    background: var(--bg-secondary);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(56, 189, 248, 0.35);
 }
 
 .btn-signup {
@@ -154,7 +154,7 @@
 .navbar:not(.scrolled):not(.dark-nav) .btn-login,
 .navbar:not(.scrolled):not(.dark-nav) .theme-toggle,
 .navbar:not(.scrolled):not(.dark-nav) .mobile-menu-toggle {
-    color: white;
+    color: rgb(255, 255, 255);
 }
 
 .navbar:not(.scrolled):not(.dark-nav) .theme-toggle {

@@ -32,7 +32,7 @@ const AboutSection = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
                 >
-                    <h2>Revolutionizing Healthcare Access</h2>
+                    <h2 id="revo">Revolutionizing Healthcare Access</h2>
                     <p>
                         PharmaConnect bridges the gap between modern pharmacies and patients,
                         creating a seamless ecosystem for better health outcomes.

@@ -107,6 +107,9 @@
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+#revo {
+    color: var(--accent-primary);
+}
 
 @media (max-width: 768px) {
     .section-header h2 {
