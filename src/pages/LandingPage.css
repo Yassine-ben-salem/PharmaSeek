@@ -34,11 +34,16 @@
 
 /* Pharmacy Side (Left/Top) */
 .pharmacy-side {
-    background: radial-gradient(circle at 30% 50%, #1e293b, var(--pharmacy-blue));
+    /* light mode: vivid blue in center → darker at edges */
+    background: radial-gradient(circle at 40% 50%, #7dd3fc, #0ea5e9 40%, #0369a1);
     background-size: 200% 200%;
     animation: gradientShift 15s ease infinite alternate;
     clip-path: polygon(0 0, 60% 0, 40% 100%, 0% 100%);
     z-index: 12;
+}
+
+[data-theme='dark'] .pharmacy-side {
+    background: radial-gradient(circle at 30% 50%, #1e293b, var(--pharmacy-blue));
 }
 
 /* Diagonal Split Separator */
@@ -80,11 +85,16 @@
 
 /* Client Side (Right/Bottom) */
 .client-side {
-    background: radial-gradient(circle at 70% 30%, var(--client-light), var(--client-mint));
+    /* light mode: vivid green in center → deeper at edges */
+    background: radial-gradient(circle at 60% 40%, #6ee7b7, #10b981 40%, #065f46);
     background-size: 200% 200%;
     animation: gradientShift 18s ease infinite alternate-reverse;
     clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%);
     z-index: 5;
+}
+
+[data-theme='dark'] .client-side {
+    background: radial-gradient(circle at 70% 30%, var(--client-light), var(--client-mint));
 }
 
 .content-wrapper {
@@ -123,6 +133,15 @@
     color: var(--pharmacy-accent);
 }
 
+/* Light mode: darken headings & body text so they read against the bright gradient */
+:root:not([data-theme='dark']) .pharmacy-side h2 {
+    color: #7bc7fa;
+}
+
+:root:not([data-theme='dark']) .pharmacy-side .text-content {
+    color: #0c3a5a;
+}
+
 .client-side .text-content {
     color: var(--text-on-dark);
     text-align: right;
@@ -130,6 +149,14 @@
 
 .client-side h2 {
     color: var(--client-accent);
+}
+
+:root:not([data-theme='dark']) .client-side h2 {
+    color: #48ffd4;
+}
+
+:root:not([data-theme='dark']) .client-side .text-content {
+    color: #064e3b;
 }
 
 h2 {
@@ -374,6 +401,10 @@ p {
     position: relative;
     z-index: 2;
     animation: gentlePulse 4s ease-in-out infinite;
+}
+
+[data-theme='dark'] .logo-container h1 {
+    color: white;
 }
 
 @keyframes gentlePulse {

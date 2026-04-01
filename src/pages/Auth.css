@@ -1,8 +1,13 @@
 .auth-page {
     min-height: 100vh;
-    background: radial-gradient(circle at 10% 20%, #0f172a, #020617);
+    background: var(--bg-secondary);
     display: flex;
     flex-direction: column;
+    transition: background var(--transition-speed);
+}
+
+[data-theme='dark'] .auth-page {
+    background: radial-gradient(circle at 10% 20%, #0f172a, #020617);
 }
 
 .auth-container {
@@ -25,19 +30,33 @@
     right: 0;
     height: 100vh;
     background:
+        radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
+    pointer-events: none;
+}
+
+[data-theme='dark'] .auth-page::before {
+    background:
         radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
         radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 40%);
-    pointer-events: none;
 }
 
 .auth-card {
     width: 100%;
     max-width: 480px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--card-bg);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-color);
     border-radius: 24px;
     padding: 2.5rem;
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.12),
+        inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'] .auth-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
     box-shadow:
         0 25px 50px -12px rgba(0, 0, 0, 0.5),
         inset 0 0 0 1px rgba(255, 255, 255, 0.05);
@@ -49,24 +68,28 @@
 }
 
 .auth-header h2 {
-    color: white;
+    color: var(--text-primary);
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
 }
 
 .auth-header p {
-    color: #94a3b8;
+    color: var(--text-secondary);
     font-size: 1rem;
 }
 
 /* Role Selector */
 .role-selector {
     display: flex;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.07);
     padding: 4px;
     border-radius: 12px;
     margin-bottom: 2rem;
+}
+
+[data-theme='dark'] .role-selector {
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .role-btn {
@@ -79,16 +102,21 @@
     border: none;
     border-radius: 8px;
     background: transparent;
-    color: #94a3b8;
+    color: var(--text-secondary);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .role-btn.active {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    color: var(--accent-primary);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme='dark'] .role-btn.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: #38bdf8;
 }
 
 /* Form */
@@ -98,7 +126,7 @@
 
 .form-group label {
     display: block;
-    color: #cbd5e1;
+    color: var(--text-primary);
     font-size: 0.9rem;
     font-weight: 500;
     margin-bottom: 0.5rem;
@@ -120,19 +148,28 @@
 .input-wrapper input {
     width: 100%;
     padding: 12px 12px 12px 40px;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    color: white;
+    color: var(--text-primary);
     font-size: 1rem;
     transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .input-wrapper input {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .input-wrapper input:focus {
     outline: none;
     border-color: #38bdf8;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--bg-primary);
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+
+[data-theme='dark'] .input-wrapper input:focus {
+    background: rgba(0, 0, 0, 0.3);
 }
 
 /* Actions */
@@ -148,7 +185,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #cbd5e1;
+    color: var(--text-secondary);
     cursor: pointer;
 }
 
@@ -189,7 +226,7 @@
 .auth-footer {
     text-align: center;
     margin-top: 1.5rem;
-    color: #94a3b8;
+    color: var(--text-secondary);
     font-size: 0.95rem;
 }
 
