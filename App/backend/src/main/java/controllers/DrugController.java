@@ -16,9 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Tag(name="Drugs")
 public class DrugController {
-
     private final DrugService drugService;
-
     @GetMapping
     public ResponseEntity<List<DrugDto>> getAllDrugs() {
         return ResponseEntity.ok(drugService.getAllDrugs());
