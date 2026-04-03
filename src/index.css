@@ -13,6 +13,18 @@
   --border-color: rgba(0, 0, 0, 0.1);
   --btn-text: #ffffff;
 
+  /* Dashboard Light Theme */
+  --dash-pharma-bg: #f8fafc;
+  --dash-pharma-sidebar: rgba(255, 255, 255, 0.9);
+  --dash-client-bg: #f0fdf4;
+  --dash-client-sidebar: rgba(255, 255, 255, 0.9);
+  
+  --dash-text: #0f172a;
+  --dash-text-muted: #64748b;
+  --dash-border: rgba(0, 0, 0, 0.1);
+  --dash-card: rgba(255, 255, 255, 0.8);
+  --dash-card-hover: rgba(255, 255, 255, 1);
+
   /* Original Palette Variables for Hero (Preserved for the split design) */
   --pharmacy-blue: #0A192F;
   --pharmacy-accent: #38bdf8;
@@ -44,6 +56,18 @@
   --card-bg: rgba(15, 23, 42, 0.7);
   --border-color: rgba(255, 255, 255, 0.1);
   --btn-text: #0f172a;
+
+  /* Dashboard Dark Theme */
+  --dash-pharma-bg: radial-gradient(circle at 30% 50%, #1e293b, var(--pharmacy-blue));
+  --dash-pharma-sidebar: rgba(15, 23, 42, 0.8);
+  --dash-client-bg: radial-gradient(circle at 70% 30%, var(--client-light), var(--client-mint));
+  --dash-client-sidebar: rgba(6, 78, 59, 0.8);
+
+  --dash-text: #ffffff;
+  --dash-text-muted: rgba(255, 255, 255, 0.7);
+  --dash-border: rgba(255, 255, 255, 0.1);
+  --dash-card: rgba(255, 255, 255, 0.05);
+  --dash-card-hover: rgba(255, 255, 255, 0.1);
 }
 
 * {

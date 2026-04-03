@@ -12,7 +12,9 @@ import {
     Navigation,
     Clock,
     CheckCircle2,
-    X
+    X,
+    Sun,
+    Moon
 } from 'lucide-react';
 import './ClientDashboard.css';
 import pharmaciesData from '../data/pharmacies.json';
@@ -26,6 +28,16 @@ const ClientDashboard = () => {
     const [isMapModalOpen, setIsMapModalOpen] = useState(false);
     const [isReserveModalOpen, setIsReserveModalOpen] = useState(false);
     const [currentMedicine, setCurrentMedicine] = useState(null);
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+    React.useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    };
 
     // Mock Data from JSON
     const [reservations, setReservations] = useState(initialReservations);
@@ -329,7 +341,10 @@ const ClientDashboard = () => {
                                     activeTab === 'reservations' ? 'Track your active and past pickup orders.' : 'Manage your profile and preferences.'}
                         </p>
                     </div>
-                    <div className="header-actions">
+                    <div className="header-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <button className="btn-icon" onClick={toggleTheme} title="Toggle Theme">
+                            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                        </button>
                         <Link to="/" className="btn btn-outline">
                             <ArrowLeft size={16} style={{ marginRight: '8px' }} /> Back to Home
                         </Link>
@@ -356,7 +371,7 @@ const ClientDashboard = () => {
                                 <div className="map-marker">
                                     <MapPin size={48} fill="currentColor" />
                                 </div>
-                                <div style={{ position: 'absolute', bottom: '20px', left: '20px', background: 'white', padding: '1rem', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', color: 'black' }}>
+                                <div style={{ position: 'absolute', bottom: '20px', left: '20px', background: 'var(--dash-card)', padding: '1rem', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', color: 'var(--dash-text)', border: '1px solid var(--dash-border)' }}>
                                     <p style={{ fontWeight: 600 }}>{selectedPharmacy.name}</p>
                                     <p style={{ fontSize: '0.8rem', opacity: 0.7 }}>{selectedPharmacy.address}</p>
                                 </div>

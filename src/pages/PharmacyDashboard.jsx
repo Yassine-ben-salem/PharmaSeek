@@ -15,7 +15,9 @@ import {
     Clock,
     TrendingUp,
     AlertTriangle,
-    ArrowLeft
+    ArrowLeft,
+    Sun,
+    Moon
 } from 'lucide-react';
 import './PharmacyDashboard.css';
 
@@ -31,6 +33,17 @@ const PharmacyDashboard = () => {
         price: '',
         status: 'In Stock'
     });
+
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+    React.useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+    };
 
     // Dummy Inventory Data
     const [inventoryData, setInventoryData] = useState([
@@ -217,8 +230,8 @@ const PharmacyDashboard = () => {
             <div className="section-header">
                 <h2>Manage Reservations</h2>
                 <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
-                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255, 255, 255, 0.5)' }} />
-                    <input type="text" placeholder="Search Patient or Order ID..." style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.1)', background: 'rgba(255, 255, 255, 0.05)', color: 'white' }} />
+                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)' }} />
+                    <input type="text" placeholder="Search Patient or Order ID..." style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', border: '1px solid var(--dash-border)', background: 'var(--dash-card)', color: 'var(--dash-text)' }} />
                 </div>
             </div>
             <div className="table-wrapper">
@@ -321,8 +334,11 @@ const PharmacyDashboard = () => {
                                 activeTab === 'inventory' ? 'Manage and track your medical stock.' : 'Review and process patient reservations.'}
                         </p>
                     </div>
-                    <div className="header-actions">
-                        <button className="btn btn-secondary" style={{ marginRight: '1rem' }}>Today's Brief</button>
+                    <div className="header-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <button className="btn-icon" onClick={toggleTheme} title="Toggle Theme">
+                            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                        </button>
+                        <button className="btn btn-secondary">Today's Brief</button>
                         <Link to="/" className="btn btn-outline">
                             <ArrowLeft size={16} style={{ marginRight: '8px' }} /> Landing Page
                         </Link>
