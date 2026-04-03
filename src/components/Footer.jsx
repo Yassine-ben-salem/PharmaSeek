@@ -17,7 +17,7 @@ const Footer = () => {
         <footer className="footer">
             <div className="footer-content">
                 <div className="footer-section brand-section">
-                    <h3>PharmaConnect</h3>
+                    <h3>PharmaSeek</h3>
                     <p>
                         Bridging the gap between pharmacies and patients with modern technology.
                         Streamlining healthcare access for everyone.
