@@ -33,16 +33,46 @@ const ClientDashboard = () => {
     const [currentMedicine, setCurrentMedicine] = useState(null);
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const [isScanMenuOpen, setIsScanMenuOpen] = useState(false);
+    const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
     const fileInputRef = React.useRef(null);
-    const cameraInputRef = React.useRef(null);
+    const videoRef = React.useRef(null);
 
     const handleScanOption = (type) => {
         setIsScanMenuOpen(false);
         if (type === 'camera') {
-            if (cameraInputRef.current) cameraInputRef.current.click();
+            setIsCameraModalOpen(true);
         } else {
             if (fileInputRef.current) fileInputRef.current.click();
         }
+    };
+    
+    React.useEffect(() => {
+        let stream = null;
+        if (isCameraModalOpen) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(s => {
+                    stream = s;
+                    if (videoRef.current) videoRef.current.srcObject = s;
+                })
+                .catch(err => {
+                    console.error("Camera error:", err);
+                    alert("Could not access the camera. Please allow camera permissions or check your device.");
+                    setIsCameraModalOpen(false);
+                });
+        }
+        return () => {
+            if (stream) stream.getTracks().forEach(track => track.stop());
+        };
+    }, [isCameraModalOpen]);
+
+    const capturePhoto = () => {
+        setIsCameraModalOpen(false);
+        alert(`Scanning photo from camera... Medicine detected: Amoxicillin`);
+        setSearchQuery("Amoxicillin");
+    };
+
+    const closeCamera = () => {
+        setIsCameraModalOpen(false);
     };
     
     const handleFileChange = (e) => {
@@ -205,7 +235,6 @@ const ClientDashboard = () => {
                                 </button>
                             </div>
                         )}
-                        <input type="file" ref={cameraInputRef} accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleFileChange} />
                         <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
                     </div>
                 </div>
@@ -458,6 +487,28 @@ const ClientDashboard = () => {
                             <div className="form-actions">
                                 <button className="btn btn-outline" onClick={() => setIsReserveModalOpen(false)}>Cancel</button>
                                 <button className="btn btn-primary" onClick={() => handleReserve(selectedPharmacy, currentMedicine)}>Confirm Reservation</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Camera Modal */}
+                {isCameraModalOpen && (
+                    <div className="modal-overlay" onClick={closeCamera}>
+                        <div className="modal-content" onClick={e => e.stopPropagation()} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <div className="section-header" style={{ width: '100%', marginBottom: '1.5rem' }}>
+                                <h2>Scan Medicine Photo</h2>
+                                <button className="btn-icon" onClick={closeCamera}><X size={20} /></button>
+                            </div>
+                            <div style={{ width: '100%', height: '350px', backgroundColor: '#000', borderRadius: '12px', overflow: 'hidden', position: 'relative', border: '1px solid var(--dash-border)' }}>
+                                <video ref={videoRef} autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }}></video>
+                                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '200px', height: '200px', border: '2px dashed rgba(255,255,255,0.7)', borderRadius: '10px' }}></div>
+                                <div style={{ position: 'absolute', bottom: '10px', left: '0', width: '100%', textAlign: 'center', color: 'white', fontSize: '0.8rem', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>Center the medicine in the frame</div>
+                            </div>
+                            <div className="form-actions" style={{ marginTop: '1.5rem', width: '100%', justifyContent: 'center' }}>
+                                <button className="btn btn-primary" onClick={capturePhoto} style={{ padding: '0.8rem 2rem', fontSize: '1rem', width: '100%' }}>
+                                    <Camera size={18} style={{ marginRight: '8px' }} /> Capture Photo
+                                </button>
                             </div>
                         </div>
                     </div>
