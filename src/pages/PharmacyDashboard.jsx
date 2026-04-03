@@ -274,6 +274,52 @@ const PharmacyDashboard = () => {
         </div>
     );
 
+    const renderSettings = () => (
+        <div className="section-container">
+            <div className="section-header">
+                <h2>Pharmacy Settings</h2>
+            </div>
+            <form style={{ maxWidth: '600px' }}>
+                <div className="form-group">
+                    <label>Pharmacy Name</label>
+                    <input type="text" defaultValue="PharmaCentral" />
+                </div>
+                <div className="form-group">
+                    <label>Contact Email</label>
+                    <input type="email" defaultValue="contact@pharmacentral.com" />
+                </div>
+                <div className="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" defaultValue="+33 1 23 45 67 89" />
+                </div>
+                <div className="section-header" style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+                    <h3 style={{ fontSize: '1.2rem', color: 'var(--dash-text)' }}>Location Configuration</h3>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                    <div className="form-group">
+                        <label>Longitude</label>
+                        <input type="text" defaultValue="2.3522" placeholder="e.g. 2.3522" />
+                    </div>
+                    <div className="form-group">
+                        <label>Latitude</label>
+                        <input type="text" defaultValue="48.8566" placeholder="e.g. 48.8566" />
+                    </div>
+                    <div className="form-group">
+                        <label>Altitude (m)</label>
+                        <input type="text" defaultValue="35" placeholder="e.g. 35" />
+                    </div>
+                </div>
+                <div className="form-group">
+                    <label>Operating Hours</label>
+                    <input type="text" defaultValue="08:00 - 20:00 (Mon-Sat)" />
+                </div>
+                <div className="form-actions" style={{ marginTop: '1.5rem', justifyContent: 'flex-start' }}>
+                    <button className="btn btn-primary" type="button" onClick={() => alert('Settings successfully updated!')}>Save Settings</button>
+                </div>
+            </form>
+        </div>
+    );
+
     return (
         <div className="dashboard-container">
             {/* Sidebar */}
@@ -307,7 +353,10 @@ const PharmacyDashboard = () => {
                         <CalendarCheck size={20} />
                         <span>Reservations</span>
                     </button>
-                    <button className="nav-item">
+                    <button
+                        className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('settings')}
+                    >
                         <Settings size={20} />
                         <span>Settings</span>
                     </button>
@@ -327,11 +376,13 @@ const PharmacyDashboard = () => {
                     <div className="header-title">
                         <h1>
                             {activeTab === 'overview' ? 'Welcome back, Pharmacy!' :
-                                activeTab === 'inventory' ? 'Inventory Management' : 'Reservations Overview'}
+                                activeTab === 'inventory' ? 'Inventory Management' : 
+                                activeTab === 'reservations' ? 'Reservations Overview' : 'Pharmacy Settings'}
                         </h1>
                         <p>
                             {activeTab === 'overview' ? 'Here is what is happening today.' :
-                                activeTab === 'inventory' ? 'Manage and track your medical stock.' : 'Review and process patient reservations.'}
+                                activeTab === 'inventory' ? 'Manage and track your medical stock.' : 
+                                activeTab === 'reservations' ? 'Review and process patient reservations.' : 'Configure your pharmacy details and location parameters.'}
                         </p>
                     </div>
                     <div className="header-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -349,6 +400,7 @@ const PharmacyDashboard = () => {
                     {activeTab === 'overview' && renderOverview()}
                     {activeTab === 'inventory' && renderInventory()}
                     {activeTab === 'reservations' && renderReservations()}
+                    {activeTab === 'settings' && renderSettings()}
                 </div>
 
                 {isModalOpen && (

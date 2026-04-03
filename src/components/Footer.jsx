@@ -54,7 +54,7 @@ const Footer = () => {
                     <h4>Contact Us</h4>
                     <div className="contact-item">
                         <Mail size={18} />
-                        <span>support@pharmaconnect.com</span>
+                        <span>support@pharmaseek.com</span>
                     </div>
                     <div className="contact-item">
                         <Phone size={18} />
@@ -68,8 +68,8 @@ const Footer = () => {
             </div>
 
             <div className="footer-bottom">
-                <p>
-                    &copy; {new Date().getFullYear()} PharmaConnect. All rights reserved.
+                <p>S. All 
+                    &copy; {new Date().getFullYear()} PharmaSeek. All rights reserved.
                     Made with <Heart size={16} className="heart-icon" /> for better health.
                 </p>
             </div>

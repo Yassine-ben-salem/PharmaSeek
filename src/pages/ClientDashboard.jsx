@@ -14,7 +14,10 @@ import {
     CheckCircle2,
     X,
     Sun,
-    Moon
+    Moon,
+    Scan,
+    Camera,
+    Image as ImageIcon
 } from 'lucide-react';
 import './ClientDashboard.css';
 import pharmaciesData from '../data/pharmacies.json';
@@ -29,6 +32,25 @@ const ClientDashboard = () => {
     const [isReserveModalOpen, setIsReserveModalOpen] = useState(false);
     const [currentMedicine, setCurrentMedicine] = useState(null);
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+    const [isScanMenuOpen, setIsScanMenuOpen] = useState(false);
+    const fileInputRef = React.useRef(null);
+    const cameraInputRef = React.useRef(null);
+
+    const handleScanOption = (type) => {
+        setIsScanMenuOpen(false);
+        if (type === 'camera') {
+            if (cameraInputRef.current) cameraInputRef.current.click();
+        } else {
+            if (fileInputRef.current) fileInputRef.current.click();
+        }
+    };
+    
+    const handleFileChange = (e) => {
+        if(e.target.files && e.target.files.length > 0) {
+            alert(`Scanning ${e.target.files[0].name}... Medicine detected: Amoxicillin`);
+            setSearchQuery("Amoxicillin");
+        }
+    };
 
     React.useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
@@ -137,15 +159,55 @@ const ClientDashboard = () => {
         <div className="section-container">
             <div className="section-header">
                 <h2>Search Medicines</h2>
-                <div className="search-bar" style={{ position: 'relative', width: '400px' }}>
-                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                    <input
-                        type="text"
-                        placeholder="Type medicine name (e.g. Amoxicillin)..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ width: '100%', padding: '0.8rem 1rem 0.8rem 2.5rem', borderRadius: '15px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
-                    />
+                <div className="search-bar" style={{ position: 'relative', width: '100%', maxWidth: '500px', display: 'flex', gap: '0.8rem' }}>
+                    <div style={{ position: 'relative', flex: 1 }}>
+                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)' }} />
+                        <input
+                            type="text"
+                            placeholder="Type medicine name (e.g. Amoxicillin)..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{ width: '100%', padding: '0.8rem 1rem 0.8rem 2.5rem', borderRadius: '15px', border: '1px solid var(--dash-border)', background: 'var(--dash-card)', color: 'var(--dash-text)' }}
+                        />
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                        <button 
+                            className="btn-icon" 
+                            style={{ height: '100%', width: '48px', borderRadius: '15px', background: 'var(--dash-card)' }}
+                            onClick={() => setIsScanMenuOpen(!isScanMenuOpen)}
+                            title="Scan Prescription or Medicine"
+                        >
+                            <Scan size={20} />
+                        </button>
+                        
+                        {isScanMenuOpen && (
+                            <div className="scan-dropdown" style={{
+                                position: 'absolute',
+                                top: '100%',
+                                right: 0,
+                                marginTop: '0.5rem',
+                                background: 'var(--dash-client-sidebar)',
+                                border: '1px solid var(--dash-border)',
+                                borderRadius: '12px',
+                                padding: '0.5rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.5rem',
+                                width: '220px',
+                                zIndex: 50,
+                                boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+                            }}>
+                                <button className="nav-item" onClick={() => handleScanOption('camera')} style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
+                                    <Camera size={18} /> Take Photo
+                                </button>
+                                <button className="nav-item" onClick={() => handleScanOption('gallery')} style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
+                                    <ImageIcon size={18} /> Upload from Gallery
+                                </button>
+                            </div>
+                        )}
+                        <input type="file" ref={cameraInputRef} accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleFileChange} />
+                        <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
+                    </div>
                 </div>
             </div>
 

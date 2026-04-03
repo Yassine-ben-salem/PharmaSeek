@@ -23,7 +23,7 @@ const ContactSection = () => {
                                 <div className="icon-box"><Mail size={24} /></div>
                                 <div>
                                     <h3>Email Us</h3>
-                                    <p>support@pharmaconnect.com</p>
+                                    <p>support@pharmaseek.com</p>
                                 </div>
                             </div>
                             <div className="detail-item">

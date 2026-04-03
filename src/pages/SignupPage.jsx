@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, User, Stethoscope, Building, FileBadge } from 'lucide-react';
+import { Mail, Lock, ArrowRight, User, Stethoscope, Building, FileBadge, Phone, IdCard, Store, MapPin } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import './Auth.css';
@@ -65,7 +65,7 @@ const SignupPage = () => {
                             <div className="form-group">
                                 <label>Pharmacy Name</label>
                                 <div className="input-wrapper">
-                                    <Building size={18} className="input-icon" />
+                                    <Store size={18} className="input-icon" />
                                     <input type="text" placeholder="HealthPlus Pharmacy" required />
                                 </div>
                             </div>
@@ -81,9 +81,9 @@ const SignupPage = () => {
                         )}
                         {role === 'pharmacy' && (
                             <div className="form-group">
-                                <label>Adress</label>
+                                <label>Address</label>
                                 <div className="input-wrapper">
-                                    <Building size={18} className="input-icon" />
+                                    <MapPin size={18} className="input-icon" />
                                     <input type="text" placeholder="123 Main Street, City" required />
                                 </div>
                             </div>
@@ -92,8 +92,8 @@ const SignupPage = () => {
                             <div className="form-group">
                                 <label>CIN</label>
                                 <div className="input-wrapper">
-                                    <Building size={18} className="input-icon" />
-                                    <input type="text" placeholder="123 Main Street, City" required />
+                                    <IdCard size={18} className="input-icon" />
+                                    <input type="text" placeholder="Your CIN number" required />
                                 </div>
                             </div>
                         )}
@@ -108,8 +108,8 @@ const SignupPage = () => {
                         <div className="form-group">
                             <label>Phone</label>
                             <div className="input-wrapper">
-                                <Mail size={18} className="input-icon" />
-                                <input type="email" placeholder="xx-xxx-xxx" required />
+                                <Phone size={18} className="input-icon" />
+                                <input type="tel" placeholder="xx-xxx-xxx" required />
                             </div>
                         </div>
 

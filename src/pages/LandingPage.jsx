@@ -54,7 +54,7 @@ const LandingPage = () => {
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ delay: 0.2 }}
                         >
-                            <h2>Pharmacy OS</h2>
+                            <h2>Pharmacy</h2>
                             <p>Intelligence for modern pharmacies.</p>
                             <Link to="/pharmacy" className="btn-3d btn-pharmacy">
                                 Access Dashboard
