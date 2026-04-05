@@ -54,8 +54,6 @@ public class DrugController {
 
     @GetMapping("/search")
     public ResponseEntity<DrugDto> getDrugByName(@RequestParam String name) {
-        return drugService.getDrugByName(name)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return drugService.getDrugByName(name);
     }
 }

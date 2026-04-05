@@ -6,13 +6,16 @@ import entities.Pharmacy;
 import entities.PharmacyStock;
 import lombok.AllArgsConstructor;
 import mappers.PharmacyStockMapper;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import repositories.DrugRepository;
 import repositories.PharmacyRepository;
 import repositories.PharmacyStockRepository;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,12 +35,40 @@ public class PharmacyStockService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<PharmacyStockDto> getPharmacyStockById(Long id) {
+    public Optional<PharmacyStockDto> getPharmacyStockById(Long id, Authentication authentication) {
+        Long authenticatedUserId = extractAuthenticatedUserId(authentication);
+        boolean admin = hasRole(authentication, "ADMIN");
+        if (pharmacyStockRepository.findById(id).isEmpty()) {
+            throw new IllegalArgumentException("Stock with ID " + id + " not found.");
+        }
         return pharmacyStockRepository.findById(id)
-                .map(pharmacyStockMapper::toPharmacyStockDto);
+                .map(stock -> {
+                    if (!admin && !stock.getPharmacy().getId().equals(authenticatedUserId)) {
+                        throw new AccessDeniedException("You can only view stock lines for your own pharmacy.");
+                    }
+                    return pharmacyStockMapper.toPharmacyStockDto(stock);
+                });
     }
 
-    public PharmacyStockDto createPharmacyStock(PharmacyStockDto pharmacyStockDto) {
+    public PharmacyStockDto createPharmacyStock(PharmacyStockDto pharmacyStockDto, Authentication authentication) {
+        Long authenticatedUserId = extractAuthenticatedUserId(authentication);
+        boolean admin = hasRole(authentication, "ADMIN");
+
+        if (!admin) {
+            if (pharmacyStockDto.getPharmacyId() == null) {
+                pharmacyStockDto.setPharmacyId(authenticatedUserId);
+            } else if (!pharmacyStockDto.getPharmacyId().equals(authenticatedUserId)) {
+                throw new AccessDeniedException("You can only create stock lines for your own pharmacy.");
+            }
+        }
+
+        if (pharmacyStockDto.getPharmacyId() == null) {
+            throw new IllegalArgumentException("pharmacyId is required.");
+        }
+        if (pharmacyStockDto.getDrugId() == null) {
+            throw new IllegalArgumentException("drugId is required.");
+        }
+
         pharmacyStockRepository.findByPharmacyIdAndDrugId(pharmacyStockDto.getPharmacyId(), pharmacyStockDto.getDrugId())
                 .ifPresent(existing -> {
                     throw new IllegalStateException(
@@ -61,11 +92,27 @@ public class PharmacyStockService {
         return pharmacyStockMapper.toPharmacyStockDto(savedPharmacyStock);
     }
 
-    public Optional<PharmacyStockDto> updatePharmacyStock(Long id, PharmacyStockDto pharmacyStockDto) {
+    public Optional<PharmacyStockDto> updatePharmacyStock(Long id, PharmacyStockDto pharmacyStockDto, Authentication authentication) {
+        Long authenticatedUserId = extractAuthenticatedUserId(authentication);
+        boolean admin = hasRole(authentication, "ADMIN");
+
         return pharmacyStockRepository.findById(id)
                 .map(existingStock -> {
-                    Long targetPharmacyId = pharmacyStockDto.getPharmacyId() != null ? pharmacyStockDto.getPharmacyId() : existingStock.getPharmacy().getId();
-                    Long targetDrugId = pharmacyStockDto.getDrugId() != null ? pharmacyStockDto.getDrugId() : existingStock.getDrug().getId();
+                    if (!admin && !existingStock.getPharmacy().getId().equals(authenticatedUserId)) {
+                        throw new AccessDeniedException("You can only update stock lines for your own pharmacy.");
+                    }
+
+                    Long targetPharmacyId = pharmacyStockDto.getPharmacyId() != null
+                            ? pharmacyStockDto.getPharmacyId()
+                            : existingStock.getPharmacy().getId();
+
+                    if (!admin && !targetPharmacyId.equals(authenticatedUserId)) {
+                        throw new AccessDeniedException("You can only update stock lines for your own pharmacy.");
+                    }
+
+                    Long targetDrugId = pharmacyStockDto.getDrugId() != null
+                            ? pharmacyStockDto.getDrugId()
+                            : existingStock.getDrug().getId();
 
                     pharmacyStockRepository.findByPharmacyIdAndDrugId(targetPharmacyId, targetDrugId)
                             .ifPresent(duplicate -> {
@@ -93,23 +140,84 @@ public class PharmacyStockService {
                 });
     }
 
-    public boolean deletePharmacyStock(Long id) {
-        if (pharmacyStockRepository.existsById(id)) {
-            pharmacyStockRepository.deleteById(id);
-            return true;
+    public boolean deletePharmacyStock(Long id, Authentication authentication) {
+        Long authenticatedUserId = extractAuthenticatedUserId(authentication);
+        boolean admin = hasRole(authentication, "ADMIN");
+
+        Optional<PharmacyStock> stockOptional = pharmacyStockRepository.findById(id);
+        if (stockOptional.isEmpty()) {
+            return false;
         }
-        return false;
+
+        PharmacyStock stock = stockOptional.get();
+        if (!admin && !stock.getPharmacy().getId().equals(authenticatedUserId)) {
+            throw new AccessDeniedException("You can only delete stock lines for your own pharmacy.");
+        }
+
+        pharmacyStockRepository.deleteById(id);
+        return true;
     }
 
-    public List<PharmacyStockDto> getPharmacyStockByPharmacyId(Long pharmacyId) {
+    public List<PharmacyStockDto> getPharmacyStockByPharmacyId(Long pharmacyId, Authentication authentication) {
+        Long authenticatedUserId = extractAuthenticatedUserId(authentication);
+        boolean admin = hasRole(authentication, "ADMIN");
+        if (pharmacyRepository.findById(pharmacyId).isEmpty()) {
+            throw new IllegalArgumentException("Pharmacy with ID " + pharmacyId + " not found.");
+        }
+        if (!admin && !pharmacyId.equals(authenticatedUserId)) {
+            throw new AccessDeniedException("You can only view stock lines for your own pharmacy.");
+        }
+
         return pharmacyStockRepository.findByPharmacyId(pharmacyId).stream()
                 .map(pharmacyStockMapper::toPharmacyStockDto)
                 .collect(Collectors.toList());
     }
 
-    public List<PharmacyStockDto> getPharmacyStockByDrugId(Long drugId) {
-        return pharmacyStockRepository.findByDrugId(drugId).stream()
-                .map(pharmacyStockMapper::toPharmacyStockDto)
-                .collect(Collectors.toList());
+    public List<PharmacyStockDto> getPharmacyStockByDrugId(Long drugId, Authentication authentication) {
+        Long authenticatedUserId = extractAuthenticatedUserId(authentication);
+        boolean admin = hasRole(authentication, "ADMIN");
+        if (drugRepository.findById(drugId).isEmpty()) {
+            throw new IllegalArgumentException("Drug with ID " + drugId + " not found.");
+        }
+        if (admin) {
+            return pharmacyStockRepository.findByDrugId(drugId).stream()
+                    .map(pharmacyStockMapper::toPharmacyStockDto)
+                    .collect(Collectors.toList());
+        }
+
+        return pharmacyStockRepository.findByPharmacyIdAndDrugId(authenticatedUserId, drugId)
+                .map(stock -> List.of(pharmacyStockMapper.toPharmacyStockDto(stock)))
+                .orElse(Collections.emptyList());
+    }
+
+    private Long extractAuthenticatedUserId(Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new AccessDeniedException("Unauthenticated request.");
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof Long) {
+            return (Long) principal;
+        }
+        if (principal instanceof String) {
+            try {
+                return Long.parseLong((String) principal);
+            } catch (NumberFormatException ignored) {
+                throw new AccessDeniedException("Invalid authentication principal.");
+            }
+        }
+
+        throw new AccessDeniedException("Invalid authentication principal.");
+    }
+
+    private boolean hasRole(Authentication authentication, String role) {
+        if (authentication == null || authentication.getAuthorities() == null) {
+            return false;
+        }
+        String expected = "ROLE_" + role;
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(expected::equals);
     }
 }
+
