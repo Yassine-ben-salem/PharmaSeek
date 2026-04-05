@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import services.PharmacyStockService;
 
@@ -20,51 +21,65 @@ public class PharmacyStockController {
     private final PharmacyStockService pharmacyStockService;
 
     @GetMapping("/all")
-    @PreAuthorize("hasAnyRole('ADMIN','PHARMACY')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<List<PharmacyStockDto>> getAllPharmacyStock() {
         return ResponseEntity.ok(pharmacyStockService.getAllPharmacyStock());
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','PHARMACY')")
-    public ResponseEntity<PharmacyStockDto> getPharmacyStockById(@PathVariable Long id) {
-        return pharmacyStockService.getPharmacyStockById(id)
+    public ResponseEntity<PharmacyStockDto> getPharmacyStockById(@PathVariable Long id, Authentication authentication) {
+        return pharmacyStockService.getPharmacyStockById(id, authentication)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("")
     @PreAuthorize("hasAnyRole('PHARMACY','ADMIN')")
-    public ResponseEntity<PharmacyStockDto> createPharmacyStock(@RequestBody PharmacyStockDto pharmacyStockDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(pharmacyStockService.createPharmacyStock(pharmacyStockDto));
+    public ResponseEntity<PharmacyStockDto> createPharmacyStock(
+            @RequestBody PharmacyStockDto pharmacyStockDto,
+            Authentication authentication
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(pharmacyStockService.createPharmacyStock(pharmacyStockDto, authentication));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','PHARMACY')")
-    public ResponseEntity<PharmacyStockDto> updatePharmacyStock(@PathVariable Long id, @RequestBody PharmacyStockDto pharmacyStockDto) {
-        return pharmacyStockService.updatePharmacyStock(id, pharmacyStockDto)
+    public ResponseEntity<PharmacyStockDto> updatePharmacyStock(
+            @PathVariable Long id,
+            @RequestBody PharmacyStockDto pharmacyStockDto,
+            Authentication authentication
+    ) {
+        return pharmacyStockService.updatePharmacyStock(id, pharmacyStockDto, authentication)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','PHARMACY')")
-    public ResponseEntity<Void> deletePharmacyStock(@PathVariable Long id) {
-        if (pharmacyStockService.deletePharmacyStock(id)) {
+    public ResponseEntity<Void> deletePharmacyStock(@PathVariable Long id, Authentication authentication) {
+        if (pharmacyStockService.deletePharmacyStock(id, authentication)) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/pharmacy/{pharmacyId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('PHARMACY')")
-    public ResponseEntity<List<PharmacyStockDto>> getPharmacyStockByPharmacyId(@PathVariable Long pharmacyId) {
-        return ResponseEntity.ok(pharmacyStockService.getPharmacyStockByPharmacyId(pharmacyId));
+    @PreAuthorize("hasAnyRole('ADMIN','PHARMACY')")
+    public ResponseEntity<List<PharmacyStockDto>> getPharmacyStockByPharmacyId(
+            @PathVariable Long pharmacyId,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(pharmacyStockService.getPharmacyStockByPharmacyId(pharmacyId, authentication));
     }
 
     @GetMapping("/drug/{drugId}")
     @PreAuthorize("hasAnyRole('ADMIN','PHARMACY')")
-    public ResponseEntity<List<PharmacyStockDto>> getPharmacyStockByDrugId(@PathVariable Long drugId) {
-        return ResponseEntity.ok(pharmacyStockService.getPharmacyStockByDrugId(drugId));
+    public ResponseEntity<List<PharmacyStockDto>> getPharmacyStockByDrugId(
+            @PathVariable Long drugId,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(pharmacyStockService.getPharmacyStockByDrugId(drugId, authentication));
     }
 }

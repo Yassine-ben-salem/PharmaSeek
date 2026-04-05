@@ -28,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // 1. Extract JWT from Authorization header
+        // Extract JWT from Authorization header
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -38,14 +38,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwt = authHeader.substring(7); // Remove "Bearer " prefix
 
         try {
-            // 2. Parse and validate token
+            // Parse and validate token
             var claims = jwtService.parseToken(jwt);
             if (claims == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            // 3. Extract user ID and role from token
+            // Extract user ID and role from token
             String userId = claims.getSubject();
             String role = claims.get("role", String.class);
 
@@ -58,18 +58,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // Only authenticate if not already authenticated
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                // 4. Create authentication token and set in SecurityContext
+                // Create authentication token and set in SecurityContext
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 Long.parseLong(userId), // Principal = user ID
-                                null, // Credentials
+                                null,
                                 List.of(new SimpleGrantedAuthority("ROLE_" + role))
                         );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (Exception e) {
-            // Invalid token - continue without authentication
+            // Invalid token
             logger.error("JWT validation failed: " + e.getMessage());
         }
 

@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import repositories.DrugRepository;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,9 +60,11 @@ public class DrugService {
         }
         return ResponseEntity.notFound().build();
     }
-
-    public Optional<DrugDto> getDrugByName(String name) {
-        return drugRepository.findByName(name)
-                .map(drugMapper::toDrugDto);
+    public ResponseEntity<DrugDto> getDrugByName(String name) {
+        return drugRepository.findByNameIgnoreCase(name)
+                .map(drugMapper::toDrugDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
+
 }
