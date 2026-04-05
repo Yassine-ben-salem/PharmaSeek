@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c75ad96a-90b2-4f53-879b-3e824c87e720" name="Changes" comment="Added Drugs and Pharmacy stock Actions." />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_C:/Users/PC/OneDrive/Desktop/ML Projects/pfa" value="39NoO1L66x8V0KE8y1WlnPzUCuE" />
+      <entry key="_C:/Users/PC/OneDrive/Desktop/pfa" value="39eZyrhgNsaF9eCeYANNjHW78Eb" />
+    </persistenceIdMap>
+  </component>
+  <component name="CopilotUserSelectedChatMode">
+    <option name="chatModeId" value="Agent" />
+  </component>
+  <component name="CopilotUserSelectedModel">
+    <selectedModels>
+      <entry key="chat-panel" value="GPT-5.3-Codex" />
+      <entry key="agent-panel" value="GPT-5.3-Codex" />
+    </selectedModels>
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="179" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="com.intellij.jpb.NewClass" />
+        <option value="Interface" />
+        <option value="Class" />
+        <option value="Enum" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Yassine-ben-salem&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Yassine-ben-salem/pfa.git&quot;,
+    &quot;accountId&quot;: &quot;76d83a16-8343-4eec-969f-c6d409587234&quot;
+  }
+}</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/main/java/entities/User.java" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="39NoO1L66x8V0KE8y1WlnPzUCuE" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JUnit.AuthFlowIntegrationTest.executor": "Run",
+    "Maven.pfa [org.flywaydb:flyway-maven-plugin:11.17.0:clean].executor": "Run",
+    "Maven.pfa [org.flywaydb:flyway-maven-plugin:11.17.0:migrate].executor": "Run",
+    "Maven.pfa [org.flywaydb:flyway-maven-plugin:11.17.0:repair].executor": "Run",
+    "Maven.pfa [org.flywaydb:flyway-maven-plugin:11.17.0:validate].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Spring Boot.PfaApplication.executor": "Run",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "yassine",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/PC/OneDrive/Desktop/pfa/App/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "com.github.copilot.settings.chat.ChatConfigurable",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\PC\OneDrive\Desktop\pfa\App\backend" />
+      <recent name="C:\Users\PC\OneDrive\Desktop\pfa\App\backend\src" />
+      <recent name="C:\Users\PC\OneDrive\Desktop\pfa" />
+      <recent name="C:\Users\PC\OneDrive\Desktop\pfa\src" />
+      <recent name="C:\Users\PC\OneDrive\Desktop\pfa\src\main\java\services" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\PC\OneDrive\Desktop\pfa\App" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.PfaApplication">
+    <configuration name="AuthFlowIntegrationTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="pfa" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.pfa.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.pfa" />
+      <option name="MAIN_CLASS_NAME" value="com.pfa.AuthFlowIntegrationTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PfaApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="pfa" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.pfa.PfaApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.AuthFlowIntegrationTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.31033.145" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c75ad96a-90b2-4f53-879b-3e824c87e720" name="Changes" comment="" />
+      <created>1770545856124</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1770545856124</updated>
+      <workItem from="1770545857246" duration="714000" />
+      <workItem from="1770546604838" duration="1171000" />
+      <workItem from="1770996102078" duration="9259000" />
+      <workItem from="1771058754512" duration="695000" />
+      <workItem from="1771059615478" duration="13078000" />
+      <workItem from="1771084445561" duration="411000" />
+      <workItem from="1771155601199" duration="4847000" />
+      <workItem from="1771232642432" duration="5755000" />
+      <workItem from="1771271848430" duration="1713000" />
+      <workItem from="1771325377389" duration="660000" />
+      <workItem from="1771326081084" duration="899000" />
+      <workItem from="1771407712637" duration="8181000" />
+      <workItem from="1771495771056" duration="701000" />
+      <workItem from="1771496997557" duration="100000" />
+      <workItem from="1771579837283" duration="687000" />
+      <workItem from="1771580546645" duration="640000" />
+      <workItem from="1771841681088" duration="235000" />
+      <workItem from="1771842132636" duration="443000" />
+      <workItem from="1772353356418" duration="4389000" />
+      <workItem from="1773573377366" duration="1577000" />
+      <workItem from="1773657390748" duration="3698000" />
+      <workItem from="1773661328483" duration="61000" />
+      <workItem from="1773669119383" duration="580000" />
+      <workItem from="1773834939030" duration="67000" />
+      <workItem from="1774100497833" duration="1092000" />
+      <workItem from="1774101608711" duration="2853000" />
+      <workItem from="1774175638188" duration="6945000" />
+      <workItem from="1774188456689" duration="2641000" />
+      <workItem from="1774261517853" duration="2930000" />
+      <workItem from="1774267215807" duration="1186000" />
+      <workItem from="1774268423341" duration="1304000" />
+      <workItem from="1774273431239" duration="3153000" />
+      <workItem from="1774279394221" duration="3244000" />
+      <workItem from="1774352506348" duration="13788000" />
+      <workItem from="1774435227579" duration="6337000" />
+      <workItem from="1774523188527" duration="8690000" />
+      <workItem from="1774689658628" duration="5058000" />
+      <workItem from="1774964448561" duration="1709000" />
+      <workItem from="1775038068517" duration="3442000" />
+      <workItem from="1775288718497" duration="694000" />
+      <workItem from="1775384392614" duration="8750000" />
+      <workItem from="1775393483514" duration="3131000" />
+    </task>
+    <task id="LOCAL-00001" summary="Added Authentication Logic">
+      <option name="closed" value="true" />
+      <created>1771271938932</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1771271938932</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Added Authentication Logic">
+      <option name="closed" value="true" />
+      <created>1771325636939</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1771325636939</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Added ADMIN Role and getAllUsers, GetUserById and getUserByRole methods.">
+      <option name="closed" value="true" />
+      <created>1771412142064</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1771412142065</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Added ADMIN Role and getAllUsers, GetUserById and getUserByRole methods.">
+      <option name="closed" value="true" />
+      <created>1771412152232</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1771412152232</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Added Drugs and Pharmacy stock Actions.">
+      <option name="closed" value="true" />
+      <created>1774265340258</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1774265340258</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.dmg" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Added Authentication Logic" />
+    <MESSAGE value="Added ADMIN Role and getAllUsers, GetUserById and getUserByRole methods." />
+    <MESSAGE value="Added Drugs and Pharmacy stock Actions." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added Drugs and Pharmacy stock Actions." />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
+  </component>
+</project>
