@@ -37,10 +37,8 @@ public class PharmacyStockService {
 
     public Optional<PharmacyStockDto> getPharmacyStockById(Long id, Authentication authentication) {
         Long authenticatedUserId = extractAuthenticatedUserId(authentication);
-        boolean admin = hasRole(authentication, "ADMIN");
-        if (pharmacyStockRepository.findById(id).isEmpty()) {
-            throw new IllegalArgumentException("Stock with ID " + id + " not found.");
-        }
+        boolean admin = isAdmin(authentication);
+
         return pharmacyStockRepository.findById(id)
                 .map(stock -> {
                     if (!admin && !stock.getPharmacy().getId().equals(authenticatedUserId)) {
@@ -52,7 +50,7 @@ public class PharmacyStockService {
 
     public PharmacyStockDto createPharmacyStock(PharmacyStockDto pharmacyStockDto, Authentication authentication) {
         Long authenticatedUserId = extractAuthenticatedUserId(authentication);
-        boolean admin = hasRole(authentication, "ADMIN");
+        boolean admin = isAdmin(authentication);
 
         if (!admin) {
             if (pharmacyStockDto.getPharmacyId() == null) {
@@ -94,7 +92,7 @@ public class PharmacyStockService {
 
     public Optional<PharmacyStockDto> updatePharmacyStock(Long id, PharmacyStockDto pharmacyStockDto, Authentication authentication) {
         Long authenticatedUserId = extractAuthenticatedUserId(authentication);
-        boolean admin = hasRole(authentication, "ADMIN");
+        boolean admin = isAdmin(authentication);
 
         return pharmacyStockRepository.findById(id)
                 .map(existingStock -> {
@@ -131,9 +129,17 @@ public class PharmacyStockService {
 
                     existingStock.setPharmacy(pharmacy);
                     existingStock.setDrug(drug);
-                    existingStock.setQuantity(pharmacyStockDto.getQuantity());
-                    existingStock.setPrice(pharmacyStockDto.getPrice());
-                    existingStock.setReservationDelayMinutes(pharmacyStockDto.getReservationDelayMinutes());
+
+                    if (pharmacyStockDto.getQuantity() != null) {
+                        existingStock.setQuantity(pharmacyStockDto.getQuantity());
+                    }
+                    if (pharmacyStockDto.getPrice() != null) {
+                        existingStock.setPrice(pharmacyStockDto.getPrice());
+                    }
+                    if (pharmacyStockDto.getReservationDelayMinutes() != null) {
+                        existingStock.setReservationDelayMinutes(pharmacyStockDto.getReservationDelayMinutes());
+                    }
+
                     existingStock.setUpdatedAt(Instant.now());
                     PharmacyStock updatedStock = pharmacyStockRepository.save(existingStock);
                     return pharmacyStockMapper.toPharmacyStockDto(updatedStock);
@@ -142,7 +148,7 @@ public class PharmacyStockService {
 
     public boolean deletePharmacyStock(Long id, Authentication authentication) {
         Long authenticatedUserId = extractAuthenticatedUserId(authentication);
-        boolean admin = hasRole(authentication, "ADMIN");
+        boolean admin = isAdmin(authentication);
 
         Optional<PharmacyStock> stockOptional = pharmacyStockRepository.findById(id);
         if (stockOptional.isEmpty()) {
@@ -160,7 +166,7 @@ public class PharmacyStockService {
 
     public List<PharmacyStockDto> getPharmacyStockByPharmacyId(Long pharmacyId, Authentication authentication) {
         Long authenticatedUserId = extractAuthenticatedUserId(authentication);
-        boolean admin = hasRole(authentication, "ADMIN");
+        boolean admin = isAdmin(authentication);
         if (pharmacyRepository.findById(pharmacyId).isEmpty()) {
             throw new IllegalArgumentException("Pharmacy with ID " + pharmacyId + " not found.");
         }
@@ -175,7 +181,7 @@ public class PharmacyStockService {
 
     public List<PharmacyStockDto> getPharmacyStockByDrugId(Long drugId, Authentication authentication) {
         Long authenticatedUserId = extractAuthenticatedUserId(authentication);
-        boolean admin = hasRole(authentication, "ADMIN");
+        boolean admin = isAdmin(authentication);
         if (drugRepository.findById(drugId).isEmpty()) {
             throw new IllegalArgumentException("Drug with ID " + drugId + " not found.");
         }
@@ -210,14 +216,13 @@ public class PharmacyStockService {
         throw new AccessDeniedException("Invalid authentication principal.");
     }
 
-    private boolean hasRole(Authentication authentication, String role) {
+    private boolean isAdmin(Authentication authentication) {
         if (authentication == null || authentication.getAuthorities() == null) {
             return false;
         }
-        String expected = "ROLE_" + role;
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(expected::equals);
+                .anyMatch("ROLE_ADMIN"::equals);
     }
 }
 

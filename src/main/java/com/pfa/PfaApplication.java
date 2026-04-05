@@ -1,16 +1,11 @@
 package com.pfa;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication(scanBasePackages = {"com.pfa", "config", "controllers", "services", "filters", "mappers", "exceptions"})
-@EnableJpaRepositories(basePackages = "repositories")
-@EntityScan(basePackages = "entities")
+
+@SpringBootApplication()
 public class PfaApplication {
     public static void main(String[] args) {
         SpringApplication.run(PfaApplication.class, args);
     }
-
 }
