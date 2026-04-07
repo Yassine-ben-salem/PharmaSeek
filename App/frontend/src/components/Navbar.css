@@ -46,6 +46,7 @@
 
 .logo-icon {
     display: flex;
+    background-image: url("../assets/logo.png");
     align-items: center;
     justify-content: center;
     background: var(--accent-primary);
