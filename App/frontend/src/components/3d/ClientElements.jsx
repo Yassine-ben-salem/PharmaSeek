@@ -53,7 +53,7 @@ const ClientElements = () => {
             </motion.div>
 
             {/* Calendar Icon */}
-            <motion.div
+            {/*<motion.div
                 className="floating-icon calendar"
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -62,7 +62,7 @@ const ClientElements = () => {
                 <Calendar size={24} className="text-blue-500" />
             </motion.div>
 
-            {/* Bell Icon */}
+            {/* Bell Icon 
             <motion.div
                 className="floating-icon bell"
                 initial={{ y: -20, opacity: 0 }}
@@ -70,7 +70,7 @@ const ClientElements = () => {
                 transition={{ duration: 0.5, delay: 1.2 }}
             >
                 <Bell size={24} className="text-yellow-500" />
-            </motion.div>
+            </motion.div>*/}
         </div>
     );
 };
