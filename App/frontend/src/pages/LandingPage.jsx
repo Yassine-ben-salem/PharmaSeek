@@ -94,7 +94,7 @@ const LandingPage = () => {
                     </div>
                 </motion.div>
 
-                {/* Center Bridge Overlay */}
+                {/* Center Bridge Overlay (animation pharmaseek) 
                 <motion.div className="bridge-overlay" style={{ opacity: bridgeOpacity, scale }}>
                     <div className="logo-container">
                         <motion.h1
@@ -106,7 +106,7 @@ const LandingPage = () => {
                         </motion.h1>
                         <DataStream />
                     </div>
-                </motion.div>
+                </motion.div>*/}
             </div>
 
             {/* Content Sections */}
