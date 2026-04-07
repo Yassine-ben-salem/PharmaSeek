@@ -51,15 +51,15 @@ const SignupPage = () => {
                             Pharmacy
                         </button>
                     </div>
-
                     <form onSubmit={handleSubmit} className="auth-form">
+                    {role === 'patient' && (
                         <div className="form-group">
                             <label>Full Name</label>
                             <div className="input-wrapper">
                                 <User size={18} className="input-icon" />
                                 <input type="text" placeholder="John Doe" required />
                             </div>
-                        </div>
+                        </div>)}
 
                         {role === 'pharmacy' && (
                             <div className="form-group">
@@ -88,7 +88,7 @@ const SignupPage = () => {
                                 </div>
                             </div>
                         )}
-                        {role === 'patient' && (
+                        {role === 'c' && (
                             <div className="form-group">
                                 <label>CIN</label>
                                 <div className="input-wrapper">
