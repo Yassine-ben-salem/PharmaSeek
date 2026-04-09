@@ -1,4 +1,14 @@
-.idea/ 
-target/ 
-.env 
-*.iml 
+# Environment files
+.env
+.env.*
+
+# IDE files
+.idea/
+*.iml
+
+# Build output
+/target/
+**/target/
+
+# Nested app workspace copy
+/App/
