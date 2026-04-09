@@ -46,11 +46,10 @@
 
 .logo-icon {
     display: flex;
-    background-image: url("../assets/logo.png");
     align-items: center;
     justify-content: center;
-    background: var(--accent-primary);
-    padding: 8px;
+    /*background:var(--accent-primary);*/
+    background-color: white;
     border-radius: 12px;
     color: white;
     box-shadow: 0 4px 10px rgba(56, 189, 248, 0.3);

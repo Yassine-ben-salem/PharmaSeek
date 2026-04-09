@@ -372,10 +372,14 @@ const ClientDashboard = () => {
             {/* Sidebar */}
             <aside className="dashboard-sidebar">
                 <div className="sidebar-brand">
-                    <div style={{ padding: '8px', background: 'white', borderRadius: '10px', color: 'var(--accent-secondary)' }}>
+                    {/*<div style={{ padding: '8px', background: 'white', borderRadius: '10px', color: 'var(--accent-secondary)' }}>
                         <Package size={24} />
+                    </div>*/}
+                    <div className="logo-icon">
+                        {/*<Activity size={24} />*/}
+                        <img src="/Logo251x251.png" alt="logo" width={50} height={50} />
                     </div>
-                    <span>PharmaSeek</span>
+                    <span style={{ color: 'var(--accent-secondary)' }}>PharmaSeek</span>
                 </div>
 
                 <nav className="sidebar-nav">

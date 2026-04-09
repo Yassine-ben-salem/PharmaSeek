@@ -325,8 +325,12 @@ const PharmacyDashboard = () => {
             {/* Sidebar */}
             <aside className="dashboard-sidebar">
                 <div className="sidebar-brand">
-                    <div style={{ padding: '8px', background: 'var(--pharmacy-accent)', borderRadius: '10px', color: 'var(--pharmacy-blue)' }}>
+                    {/*<div style={{ padding: '8px', background: 'var(--pharmacy-accent)', borderRadius: '10px', color: 'var(--pharmacy-blue)' }}>
                         <Package size={24} />
+                    </div>*/}
+                    <div className="logo-icon">
+                        {/*<Activity size={24} />*/}
+                        <img src="/Logo251x251.png" alt="logo" width={50} height={50} />
                     </div>
                     <span>PharmaSeek</span>
                 </div>

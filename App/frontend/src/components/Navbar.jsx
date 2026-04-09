@@ -88,7 +88,8 @@ const Navbar = () => {
             <div className="navbar-container">
                 <Link to="/" className="navbar-logo">
                     <div className="logo-icon">
-                        <Activity size={24} />
+                        {/*<Activity size={24} />*/}
+                        <img src="/Logo251x251.png" alt="logo" width={50} height={50} />
                     </div>
                     <span className="logo-text">PharmaSeek</span>
                 </Link>
