@@ -32,7 +32,7 @@ const SignupPage = () => {
                 >
                     <div className="auth-header">
                         <h2>Create Account</h2>
-                        <p>Join PharmaConnect today</p>
+                        <p>Join PharmaSeek today</p>
                     </div>
 
                     <div className="role-selector">
