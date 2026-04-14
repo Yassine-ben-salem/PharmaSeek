@@ -9,6 +9,3 @@
 # Build output
 /target/
 **/target/
-
-# Nested app workspace copy
-/App/
