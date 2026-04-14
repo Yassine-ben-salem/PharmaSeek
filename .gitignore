@@ -76,6 +76,3 @@ build/
 ### VS Code ###
 .vscode/
 
-### Project folders ###
-App/
->>>>>>> 919db01 (Update : changed some role based actions of PharmacyStock and Drug)
