@@ -1,22 +1,53 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, User, Stethoscope } from 'lucide-react';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { usePopUp } from '../components/usePopUp';
 import './Auth.css';
 
 const LoginPage = () => {
-    const [role, setRole] = useState('patient'); // patient or pharmacy
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    
     const navigate = useNavigate();
+    const { login } = useAuth();
+    const popup = usePopUp();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Mock login - redirect based on role
-        if (role === 'patient') {
-            navigate('/client');
-        } else {
-            navigate('/pharmacy');
+        
+        if (!email || !password) {
+            popup.error('Please fill in all fields');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const response = await login(email, password);
+            
+            if (response.user) {
+                popup.valid('Login successful!');
+                
+                // Redirect based on user role
+                const userRoles = response.user.roles || [];
+                if (userRoles.includes('CLIENT')) {
+                    navigate('/client');
+                } else if (userRoles.includes('PHARMACY')) {
+                    navigate('/pharmacy');
+                } else {
+                    navigate('/');
+                }
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            popup.error(error.message || 'Login failed. Please check your credentials.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -35,14 +66,19 @@ const LoginPage = () => {
                         <p>Sign in to access your dashboard</p>
                     </div>
 
-
-
                     <form onSubmit={handleSubmit} className="auth-form">
                         <div className="form-group">
                             <label>Email Address</label>
                             <div className="input-wrapper">
                                 <Mail size={18} className="input-icon" />
-                                <input type="email" placeholder="name@example.com" required />
+                                <input
+                                    type="email"
+                                    placeholder="name@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    disabled={isLoading}
+                                    required
+                                />
                             </div>
                         </div>
 
@@ -50,20 +86,32 @@ const LoginPage = () => {
                             <label>Password</label>
                             <div className="input-wrapper">
                                 <Lock size={18} className="input-icon" />
-                                <input type="password" placeholder="••••••••" required />
+                                <input
+                                    type="password"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    disabled={isLoading}
+                                    required
+                                />
                             </div>
                         </div>
 
                         <div className="form-actions">
                             <label className="checkbox-label">
-                                <input type="checkbox" />
+                                <input
+                                    type="checkbox"
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    disabled={isLoading}
+                                />
                                 <span>Remember me</span>
                             </label>
                             <a href="#" className="forgot-password">Forgot password?</a>
                         </div>
 
-                        <button type="submit" className="btn-submit">
-                            Sign In <ArrowRight size={18} />
+                        <button type="submit" className="btn-submit" disabled={isLoading}>
+                            {isLoading ? 'Signing In...' : 'Sign In'} <ArrowRight size={18} />
                         </button>
                     </form>
 
