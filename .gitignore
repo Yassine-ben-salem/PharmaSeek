@@ -1,0 +1,11 @@
+# Environment files
+.env
+.env.*
+
+# IDE files
+.idea/
+*.iml
+
+# Build output
+/target/
+**/target/
