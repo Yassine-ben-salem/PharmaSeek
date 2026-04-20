@@ -112,8 +112,8 @@ public class Transform {
     public static HashMap<String, ArrayList<String>> invertedIndexNgrams(String path) {
         HashMap<String, ArrayList<String>> invertedIndexStruct = new HashMap<>();
         File src = new File(path);
-        String ngram = null;  // Changed from 'word' - this is the n-gram key
-        String[] words = null;  // Changed from 'nGrams' - these are the word values
+        String ngram = null;
+        String[] words = null;
         try {
             BufferedReader reader = new BufferedReader(new FileReader(src));
             String line;
@@ -121,12 +121,12 @@ public class Transform {
                 Pattern p = Pattern.compile(".+(?=:)");
                 Matcher m = p.matcher(line);
                 if (m.find()) {
-                    ngram = m.group();  // Get n-gram key (text before ":")
+                    ngram = m.group();  
                 }
                 p = Pattern.compile("(?<=\\[).+(?=\\])");
                 m = p.matcher(line);
                 if (m.find()) {
-                    words = m.group().split(", ");  // Get word values (text between "[" and "]")
+                    words = m.group().split(", "); 
                 }
                 for (String word : words) {
                     if (invertedIndexStruct.containsKey(ngram)) {
@@ -287,7 +287,6 @@ public class Transform {
 
 
     public static void main(String[] args) {
-        HashMap<String, ArrayList<String>> invertedIndex = deserializeInvertedIndex(config.innvertedIndexSerPath);
         String input = "abultes";
         String bestMatch = cosineSimilarity(input);
         System.out.println("Best match for '" + input + "': " + bestMatch);
