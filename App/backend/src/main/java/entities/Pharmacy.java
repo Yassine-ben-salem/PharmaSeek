@@ -47,6 +47,10 @@ public class Pharmacy {
     @Column(name = "schedule")
     private String schedule;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status", nullable = false)
+    private PharmacyApprovalStatus approvalStatus;
+
     @Column(name = "created_at")
     private Instant createdAt;
 
