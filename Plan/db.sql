@@ -60,23 +60,6 @@ CREATE TABLE drug (
                       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE catalog (
-                         id BIGINT PRIMARY KEY AUTO_INCREMENT,
-                         version VARCHAR(20) NOT NULL,
-                         updated_at DATE NOT NULL,
-                         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                         UNIQUE (version)
-);
-
-CREATE TABLE drug_catalog (
-                              catalog_id BIGINT NOT NULL,
-                              drug_id BIGINT NOT NULL,
-                              PRIMARY KEY (catalog_id, drug_id),
-                              CONSTRAINT fk_drug_catalog_catalog
-                                  FOREIGN KEY (catalog_id) REFERENCES catalog(id) ON DELETE CASCADE,
-                              CONSTRAINT fk_drug_catalog_drug
-                                  FOREIGN KEY (drug_id) REFERENCES drug(id) ON DELETE CASCADE
-);
 
 CREATE TABLE stock (
                        id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -157,7 +140,6 @@ CREATE TABLE notification (
                                   CHECK (type IN ('CONFIRMATION', 'CANCELLATION', 'REMINDER', 'COMPLETION'))
 );
 
-
 CREATE TABLE password_reset_token (
                                       id BIGINT PRIMARY KEY AUTO_INCREMENT,
                                       token VARCHAR(255) NOT NULL UNIQUE,
@@ -178,13 +160,4 @@ INSERT INTO role (code, description) VALUES
 
 ALTER TABLE drug
     ADD COLUMN requires_prescription BOOLEAN NOT NULL DEFAULT FALSE;
-
-
-DROP TABLE IF EXISTS drug_catalog;
-DROP TABLE IF EXISTS catalog;
-
-ALTER TABLE pharmacy
-    ADD COLUMN approval_status VARCHAR(20) NOT NULL DEFAULT 'APPROVED';
-
-CREATE INDEX idx_pharmacy_approval_status ON pharmacy(approval_status);
 

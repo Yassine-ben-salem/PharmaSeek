@@ -1,18 +1,36 @@
 package services;
 
+<<<<<<< HEAD
 import dtos.UserDto;
+=======
+import dtos.PharmacyDto;
+import dtos.UserDto;
+import entities.PharmacyApprovalStatus;
+>>>>>>> origin/yassine
 import entities.Role;
 import entities.Roles;
 import exceptions.UserNotFoundException;
 import lombok.AllArgsConstructor;
+<<<<<<< HEAD
+=======
+import mappers.PharmacyMapper;
+>>>>>>> origin/yassine
 import mappers.UserMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repositories.RoleRepository;
+<<<<<<< HEAD
 import repositories.UserRepository;
 
+=======
+import repositories.PharmacyRepository;
+import repositories.UserRepository;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+>>>>>>> origin/yassine
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +40,13 @@ import java.util.Set;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+<<<<<<< HEAD
     private final UserMapper userMapper;
+=======
+    private final PharmacyRepository pharmacyRepository;
+    private final UserMapper userMapper;
+    private final PharmacyMapper pharmacyMapper;
+>>>>>>> origin/yassine
 
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream()
@@ -77,6 +101,28 @@ public class UserService {
         return userMapper.toUserDto(savedUser);
     }
 
+<<<<<<< HEAD
+=======
+    public List<PharmacyDto> getPendingPharmacyRequests() {
+        return pharmacyRepository.findByApprovalStatus(PharmacyApprovalStatus.PENDING)
+                .stream()
+                .map(pharmacyMapper::toPharmacyDto)
+                .toList();
+    }
+
+    @Transactional
+    public PharmacyDto updatePharmacyApprovalStatus(Long pharmacyId, boolean approved) {
+        var pharmacy = pharmacyRepository.findById(pharmacyId)
+                .orElseThrow(() -> new UserNotFoundException(pharmacyId));
+
+        pharmacy.setApprovalStatus(approved ? PharmacyApprovalStatus.APPROVED : PharmacyApprovalStatus.REJECTED);
+        pharmacy.setUpdatedAt(Instant.now().plus(1, ChronoUnit.HOURS));
+
+        var savedPharmacy = pharmacyRepository.save(pharmacy);
+        return pharmacyMapper.toPharmacyDto(savedPharmacy);
+    }
+
+>>>>>>> origin/yassine
     private boolean isAdmin(Authentication authentication) {
         return authentication != null
                 && authentication.getAuthorities().stream()

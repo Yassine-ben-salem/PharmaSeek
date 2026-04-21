@@ -5,6 +5,10 @@ import dtos.*;
 import entities.Client;
 import entities.PasswordResetToken;
 import entities.Pharmacy;
+<<<<<<< HEAD
+=======
+import entities.PharmacyApprovalStatus;
+>>>>>>> origin/yassine
 import entities.Role;
 import entities.Roles;
 import entities.User;
@@ -117,14 +121,41 @@ public class AuthService {
         );
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("User not found"));
+<<<<<<< HEAD
         return generateAuthResponse(user, response);
     }
 
+=======
+        validatePharmacyApproval(user);
+        return generateAuthResponse(user, response);
+    }
+
+    private void validatePharmacyApproval(User user) {
+        if (user.getRole() != Roles.PHARMACY) {
+            return;
+        }
+
+        Pharmacy pharmacy = pharmacyRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new BadCredentialsException("Pharmacy account is not ready yet."));
+
+        if (pharmacy.getApprovalStatus() == PharmacyApprovalStatus.PENDING) {
+            throw new BadCredentialsException("Your pharmacy account is pending admin approval.");
+        }
+        if (pharmacy.getApprovalStatus() == PharmacyApprovalStatus.REJECTED) {
+            throw new BadCredentialsException("Your pharmacy account request was rejected by an admin.");
+        }
+    }
+
+>>>>>>> origin/yassine
     public JwtResponse refresh(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new BadCredentialsException("Missing refresh token");
         }
         var user = validateRefreshToken(refreshToken);
+<<<<<<< HEAD
+=======
+        validatePharmacyApproval(user);
+>>>>>>> origin/yassine
         return generateAuthResponse(user, response);
     }
 
@@ -224,6 +255,10 @@ public class AuthService {
         pharmacy.setLatitude(request.getLatitude() != null ? request.getLatitude() : BigDecimal.ZERO);
         pharmacy.setLongitude(request.getLongitude() != null ? request.getLongitude() : BigDecimal.ZERO);
         pharmacy.setSchedule(null);
+<<<<<<< HEAD
+=======
+        pharmacy.setApprovalStatus(PharmacyApprovalStatus.PENDING);
+>>>>>>> origin/yassine
         pharmacy.setCreatedAt(persistedAt);
         pharmacy.setUpdatedAt(persistedAt);
         return pharmacy;
@@ -243,7 +278,11 @@ public class AuthService {
     public void forgotPassword(String email) {
         var userOptional = userRepository.findByEmail(email.toLowerCase().trim());
         if (userOptional.isEmpty()) {
+<<<<<<< HEAD
             return; // Keep response generic to avoid account enumeration.
+=======
+            return;
+>>>>>>> origin/yassine
         }
 
         User user = userOptional.get();

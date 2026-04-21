@@ -47,6 +47,13 @@ public class Pharmacy {
     @Column(name = "schedule")
     private String schedule;
 
+<<<<<<< HEAD
+=======
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status", nullable = false)
+    private PharmacyApprovalStatus approvalStatus;
+
+>>>>>>> origin/yassine
     @Column(name = "created_at")
     private Instant createdAt;
 

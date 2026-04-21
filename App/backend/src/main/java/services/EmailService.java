@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
 
+<<<<<<< HEAD
     // private final JavaMailSender mailSender;
     // public EmailService(JavaMailSender mailSender) { this.mailSender = mailSender; }
 
@@ -15,5 +16,10 @@ public class EmailService {
         System.out.println("MOCK EMAIL SENT TO: " + toEmail);
         System.out.println("RESET LINK: " + resetLink);
         System.out.println("----------------------------------------------------------");
+=======
+    public void sendPasswordResetEmail(String toEmail, String resetLink) {
+        System.out.println("MOCK EMAIL SENT TO: " + toEmail);
+        System.out.println("RESET LINK: " + resetLink);
+>>>>>>> origin/yassine
     }
 }
