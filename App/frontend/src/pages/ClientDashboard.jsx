@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
     Search,
@@ -19,21 +19,70 @@ import {
     Camera,
     Image as ImageIcon
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import drugService from '../services/drugService';
+import reservationService from '../services/reservationService';
+import pharmacyStockService from '../services/pharmacyStockService';
+import usePopUp from '../components/usePopUp';
 import './ClientDashboard.css';
-import pharmaciesData from '../data/pharmacies.json';
-import medicinesData from '../data/medicines.json';
-import initialReservations from '../data/reservations.json';
 
 const ClientDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedPharmacy, setSelectedPharmacy] = useState(null);
+    const { user, logout } = useAuth();
+    const { popup } = usePopUp();
+    const navigate = useNavigate();
     const [isMapModalOpen, setIsMapModalOpen] = useState(false);
     const [isReserveModalOpen, setIsReserveModalOpen] = useState(false);
     const [currentMedicine, setCurrentMedicine] = useState(null);
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const [isScanMenuOpen, setIsScanMenuOpen] = useState(false);
     const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+    
+    const [reservations, setReservations] = useState([]);
+    const [drugs, setDrugs] = useState([]);
+    const [pharmacies, setPharmacies] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async (query = '') => {
+        setIsLoading(true);
+        try {
+            let drugsData = [];
+            let pharmaciesData = [];
+            
+            if (query) {
+                try {
+                    const searchResult = await drugService.searchDrugs(query);
+                    drugsData = searchResult ? [searchResult] : [];
+                    
+                    if (drugsData.length > 0) {
+                        pharmaciesData = await pharmacyStockService.getPharmaciesWithDrug(drugsData[0].id);
+                    }
+                } catch (e) {
+                    console.log('Drug search not found, showing all drugs');
+                    drugsData = await drugService.getAllDrugs();
+                }
+            } else {
+                drugsData = await drugService.getAllDrugs();
+            }
+            
+            const reservationsData = await reservationService.getMyReservations();
+            
+            setReservations(reservationsData || []);
+            setDrugs(drugsData || []);
+            setPharmacies(pharmaciesData || []);
+        } catch (error) {
+            console.error('Failed to load data:', error);
+            popup.error('Failed to load data. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
     const fileInputRef = React.useRef(null);
     const videoRef = React.useRef(null);
 
@@ -91,26 +140,51 @@ const ClientDashboard = () => {
         setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
     };
 
-    // Mock Data from JSON
-    const [reservations, setReservations] = useState(initialReservations);
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate('/');
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
 
-    // Medicines and Pharmacies are now imported from JSON
+    const filteredPharmacies = Array.isArray(pharmacies) && searchQuery 
+        ? pharmacies.filter(pharma => 
+            pharma.stock && pharma.stock.some(med => med.drugName?.toLowerCase().includes(searchQuery.toLowerCase()))
+        )
+        : [];
 
-    const filteredPharmacies = pharmaciesData.filter(pharma =>
-        searchQuery && pharma.stock.some(med => med.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
+    const handleReserve = async (pharmacy, medicineName) => {
+        try {
+            const drug = drugs.find(d => d.name?.toLowerCase().includes(medicineName.toLowerCase()));
+            if (!drug) {
+                popup.error('Drug not found');
+                return;
+            }
+            const result = await reservationService.createReservation({
+                pharmacyId: pharmacy.pharmacyId || pharmacy.id,
+                items: [{ drugId: drug.id, quantity: 1 }]
+            });
+            if (result) {
+                setReservations([result, ...reservations]);
+                setIsReserveModalOpen(false);
+                setActiveTab('reservations');
+                popup.valid('Reservation created successfully!');
+            }
+        } catch (error) {
+            popup.error('Failed to create reservation: ' + error.message);
+        }
+    };
 
-    const handleReserve = (pharmacy, medicineName) => {
-        const newRes = {
-            id: `RES-CK-00${reservations.length + 1}`,
-            pharmacy: pharmacy.name,
-            medicine: medicineName,
-            date: new Date().toISOString().split('T')[0],
-            status: 'Pending'
-        };
-        setReservations([newRes, ...reservations]);
-        setIsReserveModalOpen(false);
-        setActiveTab('reservations');
+    const handleCancelReservation = async (reservationId) => {
+        try {
+            await reservationService.cancelReservation(reservationId);
+            setReservations(reservations.filter(r => r.id !== reservationId));
+            popup.valid('Reservation cancelled');
+        } catch (error) {
+            popup.error('Failed to cancel reservation: ' + error.message);
+        }
     };
 
     const openMap = (pharmacy) => {
@@ -414,10 +488,10 @@ const ClientDashboard = () => {
                 </nav>
 
                 <div className="sidebar-footer">
-                    <Link to="/" className="nav-item">
+                    <button className="nav-item" onClick={handleLogout} style={{ width: '100%', border: 'none', background: 'transparent', cursor: 'pointer' }}>
                         <LogOut size={20} />
                         <span>Sign Out</span>
-                    </Link>
+                    </button>
                 </div>
             </aside>
 

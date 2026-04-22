@@ -20,6 +20,7 @@ import {
     Moon
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import drugService from '../services/drugService';
 import reservationService from '../services/reservationService';
 import pharmacyStockService from '../services/pharmacyStockService';
 import usePopUp from '../components/usePopUp';
@@ -27,9 +28,6 @@ import './PharmacyDashboard.css';
 
 const PharmacyDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
-    const { user, logout } = useAuth();
-    const { popup } = usePopUp();
-    const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [currentProductId, setCurrentProductId] = useState(null);
@@ -42,12 +40,14 @@ const PharmacyDashboard = () => {
     });
 
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-
     const [inventoryData, setInventoryData] = useState([]);
     const [reservationsData, setReservationsData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { user, logout } = useAuth();
+    const { popup } = usePopUp();
+    const navigate = useNavigate();
 
-    React.useEffect(() => {
+    useEffect(() => {
         loadData();
     }, []);
 
@@ -62,12 +62,13 @@ const PharmacyDashboard = () => {
             setReservationsData(reservations || []);
         } catch (error) {
             console.error('Failed to load data:', error);
+            popup.error('Failed to load data. Please try again.');
         } finally {
             setIsLoading(false);
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
     }, [theme]);
@@ -107,7 +108,41 @@ const PharmacyDashboard = () => {
         }
     };
 
-    const renderOverview = () => (
+    const handleSaveProduct = async (e) => {
+        e.preventDefault();
+        try {
+            if (isEditing) {
+                await pharmacyStockService.updateStock(currentProductId, {
+                    quantity: parseInt(newProduct.stock),
+                    price: newProduct.price
+                });
+            } else {
+                await pharmacyStockService.addStock({
+                    drugName: newProduct.name,
+                    quantity: parseInt(newProduct.stock),
+                    price: newProduct.price
+                });
+            }
+            await loadData();
+            setIsModalOpen(false);
+            setIsEditing(false);
+            setNewProduct({ name: '', category: '', stock: '', price: '', status: 'In Stock' });
+            popup.valid('Product saved successfully!');
+        } catch (error) {
+            popup.error('Failed to save product: ' + error.message);
+        }
+    };
+
+    const renderOverview = () => {
+        const totalProducts = inventoryData?.length || 0;
+        const lowStockItems = inventoryData?.filter(item => item.quantity < 10).length || 0;
+        const todayReservations = reservationsData?.filter(r => {
+            const today = new Date().toISOString().split('T')[0];
+            return r.reservedAt?.startsWith(today);
+        }).length || 0;
+        const pendingReservations = reservationsData?.filter(r => r.status === 'PENDING').length || 0;
+        
+        return (
         <>
             <div className="stats-grid">
                 <div className="stat-card">
@@ -115,7 +150,7 @@ const PharmacyDashboard = () => {
                         <Package size={24} />
                     </div>
                     <div className="stat-info">
-                        <div className="stat-value">1,284</div>
+                        <div className="stat-value">{totalProducts}</div>
                         <div className="stat-label">Total Products</div>
                     </div>
                 </div>
@@ -124,7 +159,7 @@ const PharmacyDashboard = () => {
                         <AlertTriangle size={24} />
                     </div>
                     <div className="stat-info">
-                        <div className="stat-value">12</div>
+                        <div className="stat-value">{lowStockItems}</div>
                         <div className="stat-label">Low Stock items</div>
                     </div>
                 </div>
@@ -133,8 +168,8 @@ const PharmacyDashboard = () => {
                         <CalendarCheck size={24} />
                     </div>
                     <div className="stat-info">
-                        <div className="stat-value">48</div>
-                        <div className="stat-label">Reservations Today</div>
+                        <div className="stat-value">{todayReservations}</div>
+                        <div className="stat-label">Today's Reservations</div>
                     </div>
                 </div>
                 <div className="stat-card">
@@ -142,8 +177,8 @@ const PharmacyDashboard = () => {
                         <TrendingUp size={24} />
                     </div>
                     <div className="stat-info">
-                        <div className="stat-value">€2,450</div>
-                        <div className="stat-label">Total Gained Today</div>
+                        <div className="stat-value">{pendingReservations}</div>
+                        <div className="stat-label">Pending Orders</div>
                     </div>
                 </div>
             </div>
@@ -165,46 +200,39 @@ const PharmacyDashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {reservationsData.slice(0, 3).map(res => (
-                                <tr key={res.id}>
-                                    <td><strong>{res.id}</strong></td>
-                                    <td>{res.patient}</td>
-                                    <td>{res.medicine}</td>
-                                    <td>
-                                        <span className={`badge ${res.status === 'Ready' ? 'badge-success' :
-                                            res.status === 'Pending' ? 'badge-warning' : 'badge-info'
-                                            }`}>
-                                            {res.status}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button className="btn-icon"><CheckCircle2 size={18} /></button>
+                            {reservationsData && reservationsData.length > 0 ? (
+                                reservationsData.slice(0, 3).map(res => (
+                                    <tr key={res.id}>
+                                        <td><strong>{res.id}</strong></td>
+                                        <td>{res.clientId}</td>
+                                        <td>{res.items?.map(i => i.drugName || i.drugId).join(', ') || 'N/A'}</td>
+                                        <td>
+                                            <span className={`badge ${res.status === 'READY' ? 'badge-success' :
+                                                res.status === 'PENDING' ? 'badge-warning' : 'badge-info'
+                                                }`}>
+                                                {res.status || 'PENDING'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button className="btn-icon" onClick={() => handleUpdateReservationStatus(res.id, 'READY')}><CheckCircle2 size={18} /></button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                                        No reservations yet.
                                     </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>
             </div>
         </>
-    );
+        );
 
-    const handleSaveProduct = (e) => {
-        e.preventDefault();
-        if (isEditing) {
-            setInventoryData(inventoryData.map(item =>
-                item.id === currentProductId ? { ...newProduct, id: currentProductId } : item
-            ));
-        } else {
-            const id = inventoryData.length + 1;
-            setInventoryData([...inventoryData, { ...newProduct, id }]);
-        }
-        setIsModalOpen(false);
-        setIsEditing(false);
-        setNewProduct({ name: '', category: '', stock: '', price: '', status: 'In Stock' });
-    };
-
-    const handleEditClick = (product) => {
+        const handleEditClick = (product) => {
         setIsEditing(true);
         setCurrentProductId(product.id);
         setNewProduct({
@@ -245,27 +273,35 @@ const PharmacyDashboard = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {inventoryData.map(item => (
-                            <tr key={item.id}>
-                                <td><strong>{item.name}</strong></td>
-                                <td>{item.category}</td>
-                                <td>{item.stock}</td>
-                                <td>{item.price}</td>
-                                <td>
-                                    <span className={`badge ${item.status === 'In Stock' ? 'badge-success' :
-                                        item.status === 'Low Stock' ? 'badge-warning' : 'badge-danger'
-                                        }`}>
-                                        {item.status}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div className="action-btns">
-                                        <button className="btn-icon" onClick={() => handleEditClick(item)}><Edit2 size={16} /></button>
-                                        <button className="btn-icon"><Trash2 size={16} /></button>
-                                    </div>
+                        {inventoryData && inventoryData.length > 0 ? (
+                            inventoryData.map(item => (
+                                <tr key={item.id}>
+                                    <td><strong>{item.drugName || item.name}</strong></td>
+                                    <td>{item.category || 'General'}</td>
+                                    <td>{item.quantity || item.stock || 0}</td>
+                                    <td>{item.price || '$0.00'}</td>
+                                    <td>
+                                        <span className={`badge ${item.quantity > 10 ? 'badge-success' :
+                                            item.quantity > 0 ? 'badge-warning' : 'badge-danger'
+                                            }`}>
+                                            {item.quantity > 10 ? 'In Stock' : item.quantity > 0 ? 'Low Stock' : 'Out of Stock'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div className="action-btns">
+                                            <button className="btn-icon" onClick={() => handleEditClick(item)}><Edit2 size={16} /></button>
+                                            <button className="btn-icon" onClick={() => handleDeleteStock(item.id)}><Trash2 size={16} /></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                                    No inventory items. Add your first product!
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -294,27 +330,35 @@ const PharmacyDashboard = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {reservationsData.map(res => (
-                            <tr key={res.id}>
-                                <td><strong>{res.id}</strong></td>
-                                <td>{res.patient}</td>
-                                <td>{res.medicine}</td>
-                                <td>{res.date}</td>
-                                <td>
-                                    <span className={`badge ${res.status === 'Ready' ? 'badge-success' :
-                                        res.status === 'Pending' ? 'badge-warning' : 'badge-info'
-                                        }`}>
-                                        {res.status}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div className="action-btns">
-                                        <button className="btn-icon" title="Mark as Ready"><CheckCircle2 size={16} /></button>
-                                        <button className="btn-icon" title="View Details"><Clock size={16} /></button>
-                                    </div>
+                        {reservationsData && reservationsData.length > 0 ? (
+                            reservationsData.map(res => (
+                                <tr key={res.id}>
+                                    <td><strong>{res.id}</strong></td>
+                                    <td>{res.clientId}</td>
+                                    <td>{res.items?.map(i => i.drugName || i.drugId).join(', ') || 'N/A'}</td>
+                                    <td>{res.reservedAt ? new Date(res.reservedAt).toLocaleDateString() : 'N/A'}</td>
+                                    <td>
+                                        <span className={`badge ${res.status === 'READY' ? 'badge-success' :
+                                            res.status === 'PENDING' ? 'badge-warning' : 'badge-info'
+                                            }`}>
+                                            {res.status || 'PENDING'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div className="action-btns">
+                                            <button className="btn-icon" title="Mark as Ready" onClick={() => handleUpdateReservationStatus(res.id, 'READY')}><CheckCircle2 size={16} /></button>
+                                            <button className="btn-icon" title="View Details"><Clock size={16} /></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+                                    No reservations yet.
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -414,10 +458,10 @@ const PharmacyDashboard = () => {
                 </nav>
 
                 <div className="sidebar-footer">
-                    <Link to="/" className="nav-item">
+                    <button className="nav-item" onClick={handleLogout} style={{ width: '100%', border: 'none', background: 'transparent', cursor: 'pointer' }}>
                         <LogOut size={20} />
                         <span>Sign Out</span>
-                    </Link>
+                    </button>
                 </div>
             </aside>
 
@@ -426,7 +470,7 @@ const PharmacyDashboard = () => {
                 <header className="dashboard-header">
                     <div className="header-title">
                         <h1>
-                            {activeTab === 'overview' ? 'Welcome back, Pharmacy!' :
+                            {activeTab === 'overview' ? `Welcome back, ${user?.name || 'Pharmacy'}!` :
                                 activeTab === 'inventory' ? 'Inventory Management' : 
                                 activeTab === 'reservations' ? 'Reservations Overview' : 'Pharmacy Settings'}
                         </h1>

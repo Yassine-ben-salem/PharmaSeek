@@ -23,6 +23,14 @@ const pharmacyStockService = {
   },
 
   /**
+   * Get pharmacies that have a specific drug in stock
+   */
+  getPharmaciesWithDrug: async (drugId) => {
+    const response = await apiClient.get(`/pharmacy-stock/drug/${drugId}`);
+    return response;
+  },
+
+  /**
    * Get pharmacy inventory (Pharmacy/Admin)
    */
   getPharmacyInventory: async (pharmacyId) => {
@@ -34,12 +42,12 @@ const pharmacyStockService = {
    * Get pharmacy's own inventory (from auth context)
    */
   getMyInventory: async () => {
-    const response = await apiClient.get('/pharmacy-stock/me');
+    const response = await apiClient.get('/pharmacy-stock');
     return response;
   },
 
   /**
-   * Get stock by drug ID
+   * Get stock by drug ID (which pharmacies have this drug)
    */
   getStockByDrug: async (drugId) => {
     const response = await apiClient.get(`/pharmacy-stock/drug/${drugId}`);
