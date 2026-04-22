@@ -1,24 +1,6 @@
 import { useState, useCallback } from 'react';
 
-/**
- * usePopUp — lightweight popup manager
- *
- * Returns:
- *   popups   – array of active popup objects
- *   popup    – object with { valid, warning, error } shorthand helpers
- *   addPopUp – raw add function  addPopUp({ type, message, duration? })
- *   remove   – remove a popup by id
- *
- * Usage:
- *   const { popups, popup, remove } = usePopUp();
- *   popup.valid('Medication saved!');
- *   popup.warning('Stock running low.');
- *   popup.error('Connection failed.');
- *
- *   // In JSX:
- *   <PopUpContainer popups={popups} onRemove={remove} />
- */
-const usePopUp = () => {
+export const usePopUp = () => {
   const [popups, setPopUps] = useState([]);
 
   const remove = useCallback((id) => {
@@ -40,4 +22,3 @@ const usePopUp = () => {
   return { popups, popup, addPopUp, remove };
 };
 
-export default usePopUp;

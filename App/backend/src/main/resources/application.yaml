@@ -6,7 +6,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/pharmacy-app?createDatabaseIfNotExist=true
     username: root
-    password: root
+    password: Adem147852369..
   jpa:
     show-sql: true
   jackson:
