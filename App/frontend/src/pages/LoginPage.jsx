@@ -5,7 +5,7 @@ import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { usePopUp } from '../components/usePopUp';
+import  usePopUp  from '../components/usePopUp';
 import './Auth.css';
 
 const LoginPage = () => {
@@ -16,7 +16,7 @@ const LoginPage = () => {
     
     const navigate = useNavigate();
     const { login } = useAuth();
-    const popup = usePopUp();
+    const {popup} = usePopUp();
 
     const handleSubmit = async (e) => {
         e.preventDefault();

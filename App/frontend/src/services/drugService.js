@@ -34,12 +34,9 @@ const drugService = {
    * Create new drug (Pharmacy/Admin only)
    */
   createDrug: async (drugData) => {
-    const response = await apiClient.post('/drugs/create', {
+    const response = await apiClient.post('/drugs', {
       name: drugData.name,
       description: drugData.description,
-      barCode: drugData.barCode,
-      category: drugData.category,
-      manufacturer: drugData.manufacturer,
       requiresPrescription: drugData.requiresPrescription || false,
     });
     return response;
@@ -52,9 +49,6 @@ const drugService = {
     const response = await apiClient.put(`/drugs/${drugId}`, {
       name: drugData.name,
       description: drugData.description,
-      barCode: drugData.barCode,
-      category: drugData.category,
-      manufacturer: drugData.manufacturer,
       requiresPrescription: drugData.requiresPrescription,
     });
     return response;

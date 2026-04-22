@@ -5,15 +5,15 @@ import { Mail, Lock, ArrowRight, User, Stethoscope, Building, FileBadge, Phone, 
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { usePopUp } from '../components/usePopUp';
+import usePopUp from '../components/usePopUp';
 import './Auth.css';
 
 const SignupPage = () => {
-    const [role, setRole] = useState('patient');
+    const [role, setRole] = useState('client');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { signup } = useAuth();
-    const popup = usePopUp();
+    const {popup} = usePopUp();
 
     // Common fields
     const [email, setEmail] = useState('');
@@ -34,7 +34,7 @@ const SignupPage = () => {
         e.preventDefault();
 
         // Validate fields
-        if (role === 'patient') {
+        if (role === 'client') {
             if (!fullName || !email || !phone || !password) {
                 popup.error('Please fill in all fields');
                 return;
@@ -61,7 +61,7 @@ const SignupPage = () => {
         setIsLoading(true);
         try {
             let userData;
-            if (role === 'patient') {
+            if (role === 'client') {
                 userData = {
                     name: fullName,
                     email,
@@ -110,8 +110,8 @@ const SignupPage = () => {
 
                     <div className="role-selector">
                         <button
-                            className={`role-btn ${role === 'patient' ? 'active' : ''}`}
-                            onClick={() => setRole('patient')}
+                            className={`role-btn ${role === 'client' ? 'active' : ''}`}
+                            onClick={() => setRole('client')}
                             disabled={isLoading}
                         >
                             <User size={18} />
@@ -127,7 +127,7 @@ const SignupPage = () => {
                         </button>
                     </div>
                     <form onSubmit={handleSubmit} className="auth-form">
-                    {role === 'patient' && (
+                    {role === 'client' && (
                         <div className="form-group">
                             <label>Full Name</label>
                             <div className="input-wrapper">

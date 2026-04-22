@@ -34,8 +34,20 @@ const userService = {
    * Update user role (Admin only)
    */
   updateUserRole: async (userId, role) => {
-    const response = await apiClient.put(`/users/${userId}/role`, {
+    const response = await apiClient.patch(`/users/${userId}/role`, {
       role,
+    });
+    return response;
+  },
+
+  getPendingPharmacies: async () => {
+    const response = await apiClient.get('/users/pharmacies/pending');
+    return response;
+  },
+
+  approvePharmacy: async (pharmacyId, approved) => {
+    const response = await apiClient.patch(`/users/pharmacies/${pharmacyId}/approval`, {
+      approved,
     });
     return response;
   },

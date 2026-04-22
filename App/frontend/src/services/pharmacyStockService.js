@@ -31,6 +31,14 @@ const pharmacyStockService = {
   },
 
   /**
+   * Get pharmacy's own inventory (from auth context)
+   */
+  getMyInventory: async () => {
+    const response = await apiClient.get('/pharmacy-stock/me');
+    return response;
+  },
+
+  /**
    * Get stock by drug ID
    */
   getStockByDrug: async (drugId) => {
@@ -43,7 +51,6 @@ const pharmacyStockService = {
    */
   addStock: async (stockData) => {
     const response = await apiClient.post('/pharmacy-stock', {
-      pharmacyId: stockData.pharmacyId,
       drugId: stockData.drugId,
       quantity: stockData.quantity,
       price: stockData.price,

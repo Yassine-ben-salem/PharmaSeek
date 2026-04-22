@@ -59,24 +59,22 @@ const reservationService = {
    */
   createReservation: async (reservationData) => {
     const response = await apiClient.post('/reservations', {
-      clientId: reservationData.clientId,
       pharmacyId: reservationData.pharmacyId,
       items: reservationData.items.map((item) => ({
         drugId: item.drugId,
         quantity: item.quantity,
       })),
+      notes: reservationData.notes || '',
     });
     return response;
   },
 
   /**
-   * Update reservation details
+   * Update reservation notes
    */
-  updateReservation: async (reservationId, reservationData) => {
+  updateReservation: async (reservationId, notes) => {
     const response = await apiClient.put(`/reservations/${reservationId}`, {
-      clientId: reservationData.clientId,
-      pharmacyId: reservationData.pharmacyId,
-      notes: reservationData.notes,
+      notes,
     });
     return response;
   },

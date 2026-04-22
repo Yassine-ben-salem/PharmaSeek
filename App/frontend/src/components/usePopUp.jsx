@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export const usePopUp = () => {
+const usePopUp = () => {
   const [popups, setPopUps] = useState([]);
 
   const remove = useCallback((id) => {
@@ -22,3 +22,4 @@ export const usePopUp = () => {
   return { popups, popup, addPopUp, remove };
 };
 
+export default usePopUp;
