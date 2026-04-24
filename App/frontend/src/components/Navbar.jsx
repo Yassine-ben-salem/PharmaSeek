@@ -122,6 +122,9 @@ const Navbar = () => {
                     </button>
                     {isAuthenticated ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {userRole === 'ADMIN' && (
+                                <Link to="/admin" className="btn-nav btn-admin" style={{ background: 'var(--accent-primary)', color: '#fff', padding: '0.4rem 0.8rem' }}>Admin</Link>
+                            )}
                             <User size={18} />
                             <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{user?.name?.split(' ')[0] || userRole}</span>
                             <button

@@ -5,6 +5,7 @@ import { PopUpContainer } from './components/PopUp';
 import LandingPage from './pages/LandingPage';
 import ClientDashboard from './pages/ClientDashboard';
 import PharmacyDashboard from './pages/PharmacyDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -34,6 +35,14 @@ function App() {
                 element={
                   <ProtectedRoute requiredRole="PHARMACY">
                     <PharmacyDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute requiredRole="ADMIN">
+                    <AdminDashboard />
                   </ProtectedRoute>
                 }
               />

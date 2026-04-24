@@ -48,8 +48,11 @@ const LandingPage = () => {
                             <p>Intelligence for modern pharmacies.</p>
                             <button 
                                 className="btn-3d btn-pharmacy"
+                                disabled={isAuthenticated && userRole === 'ADMIN'}
                                 onClick={() => {
-                                    if (isAuthenticated && userRole === 'PHARMACY') {
+                                    if (isAuthenticated && userRole === 'ADMIN') {
+                                        popup.error('Please use the Admin Dashboard to manage the system.');
+                                    } else if (isAuthenticated && userRole === 'PHARMACY') {
                                         window.location.href = '/pharmacy';
                                     } else if (isAuthenticated && userRole === 'CLIENT') {
                                         popup.error('This dashboard is for pharmacies only. Please login as a pharmacy to access.');
@@ -58,7 +61,7 @@ const LandingPage = () => {
                                     }
                                 }}
                             >
-                                {isAuthenticated && userRole === 'PHARMACY' ? 'Access Dashboard' : 'Login to Access'}
+                                {isAuthenticated && userRole === 'PHARMACY' ? 'Access Dashboard' : isAuthenticated && userRole === 'ADMIN' ? 'Admin Only' : 'Login to Access'}
                             </button>
                         </div>
                         <div className="visual-content">
@@ -80,8 +83,11 @@ const LandingPage = () => {
                             <p>Your health, simplified.</p>
                             <button 
                                 className="btn-3d btn-client"
+                                disabled={isAuthenticated && userRole === 'ADMIN'}
                                 onClick={() => {
-                                    if (isAuthenticated && userRole === 'CLIENT') {
+                                    if (isAuthenticated && userRole === 'ADMIN') {
+                                        popup.error('Please use the Admin Dashboard to manage the system.');
+                                    } else if (isAuthenticated && userRole === 'CLIENT') {
                                         window.location.href = '/client';
                                     } else if (isAuthenticated && userRole === 'PHARMACY') {
                                         popup.error('This app is for patients only. Please login as a client to access.');
@@ -90,7 +96,7 @@ const LandingPage = () => {
                                     }
                                 }}
                             >
-                                {isAuthenticated && userRole === 'CLIENT' ? 'Open App' : 'Login to Access'}
+                                {isAuthenticated && userRole === 'CLIENT' ? 'Open App' : isAuthenticated && userRole === 'ADMIN' ? 'Admin Only' : 'Login to Access'}
                             </button>
                         </div>
                     </div>

@@ -32,15 +32,16 @@ const LoginPage = () => {
             
             if (response.user) {
                 popup.valid('Login successful!');
-                
-                const userRole = response.user.role;
-                if (userRole === 'CLIENT') {
-                    window.location.href = '/client';
-                } else if (userRole === 'PHARMACY') {
-                    window.location.href = '/pharmacy';
-                } else {
-                    window.location.href = '/';
-                }
+                setTimeout(() => {
+                    const userRole = response.user.role;
+                    if (userRole === 'CLIENT') {
+                        window.location.href = '/client';
+                    } else if (userRole === 'PHARMACY') {
+                        window.location.href = '/pharmacy';
+                    } else {
+                        window.location.href = '/admin';
+                    }
+                }, 1000);
             }
         } catch (error) {
             console.error('Login error:', error);

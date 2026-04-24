@@ -138,10 +138,14 @@ const SignupPage = () => {
             }
 
             await signup(userData, role);
-            popup.valid('Account created successfully!');
             
-            // Redirect based on role
-            navigate(role === 'client' ? '/client/dashboard' : '/pharmacy/dashboard');
+            if (role === 'pharmacy') {
+                popup.valid('Your request has been submitted! You will receive an email with the decision within 24 hours.');
+                navigate('/login');
+            } else {
+                popup.valid('Account created successfully!');
+                navigate('/client/dashboard');
+            }
         } catch (error) {
             console.error('Signup error:', error);
             popup.error(error.message || 'Signup failed. Please try again.');
