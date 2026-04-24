@@ -9,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import services.PharmacyService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/pharmacies")
 @AllArgsConstructor
@@ -16,6 +18,11 @@ import services.PharmacyService;
 public class PharmacyController {
 
     private final PharmacyService pharmacyService;
+
+    @GetMapping
+    public ResponseEntity<List<PharmacyDto>> getAllPharmacies() {
+        return ResponseEntity.ok(pharmacyService.getAllPharmacies());
+    }
 
     @PutMapping("/me")
     @PreAuthorize("hasRole('PHARMACY')")

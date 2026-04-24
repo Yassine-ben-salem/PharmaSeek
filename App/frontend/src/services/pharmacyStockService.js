@@ -121,6 +121,11 @@ const pharmacyStockService = {
     const response = await apiClient.get(`/pharmacy-stock/nearby/${drugId}?latitude=${latitude}&longitude=${longitude}`);
     return response;
   },
+
+  getAllPharmacies: async () => {
+    const response = await apiClient.get('/pharmacies');
+    return response;
+  },
 };
 
 export default pharmacyStockService;

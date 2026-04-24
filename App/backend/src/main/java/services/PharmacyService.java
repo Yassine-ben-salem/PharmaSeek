@@ -12,7 +12,9 @@ import repositories.PharmacyRepository;
 import repositories.UserRepository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -21,6 +23,12 @@ public class PharmacyService {
     private final PharmacyRepository pharmacyRepository;
     private final UserRepository userRepository;
     private final PharmacyMapper pharmacyMapper;
+
+    public List<PharmacyDto> getAllPharmacies() {
+        return pharmacyRepository.findAll().stream()
+                .map(pharmacyMapper::toPharmacyDto)
+                .collect(Collectors.toList());
+    }
 
     public Optional<PharmacyDto> updatePharmacy(Authentication authentication, PharmacyDto pharmacyDto) {
         Long userId = resolveUserId(authentication);

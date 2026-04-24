@@ -56,6 +56,8 @@ const ClientDashboard = () => {
     });
     const [isSaving, setIsSaving] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [nearbyCount, setNearbyCount] = useState(0);
+    const [isNearbyHovered, setIsNearbyHovered] = useState(false);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -63,6 +65,39 @@ const ClientDashboard = () => {
         }, 1000);
         return () => clearInterval(timer);
     }, []);
+
+    const calculateNearbyPharmacies = (pharmaciesList) => {
+        if (!navigator.geolocation) {
+            setNearbyCount(pharmaciesList?.filter(p => p.latitude && p.longitude).length || 0);
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                const nearby = pharmaciesList.filter(p => {
+                    if (!p.latitude || !p.longitude) return false;
+                    const distance = getDistance(userLat, userLng, p.latitude, p.longitude);
+                    return distance <= 5;
+                });
+                setNearbyCount(nearby.length);
+            },
+            () => {
+                setNearbyCount(pharmaciesList?.filter(p => p.latitude && p.longitude).length || 0);
+            }
+        );
+    };
+
+    const getDistance = (lat1, lon1, lat2, lon2) => {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    };
 
     const getDrugNames = (items) => {
         if (!items || items.length === 0) return 'N/A';
@@ -90,6 +125,12 @@ const ClientDashboard = () => {
     }, []);
 
     useEffect(() => {
+        if (pharmacies.length > 0) {
+            calculateNearbyPharmacies(pharmacies);
+        }
+    }, [pharmacies]);
+
+    useEffect(() => {
         const fetchSearchResults = async () => {
             if (searchQuery.trim()) {
                 setIsLoading(true);
@@ -101,7 +142,6 @@ const ClientDashboard = () => {
                         setDrugs([]);
                     }
                     setSelectedDrug(null);
-                    setPharmacies([]);
                 } catch (error) {
                     console.error('Search error:', error);
                     setDrugs([]);
@@ -111,7 +151,6 @@ const ClientDashboard = () => {
             } else {
                 setDrugs([]);
                 setSelectedDrug(null);
-                setPharmacies([]);
             }
         };
 
@@ -140,6 +179,7 @@ const ClientDashboard = () => {
 
     const loadData = async (query = '') => {
         setIsLoading(true);
+        console.log('loadData called with query:', query);
         try {
             let drugsData = [];
             let pharmaciesData = [];
@@ -158,6 +198,14 @@ const ClientDashboard = () => {
                 }
             } else {
                 drugsData = await drugService.getAllDrugs();
+            }
+
+            try {
+                const allPharmacies = await pharmacyStockService.getAllPharmacies();
+                pharmaciesData = allPharmacies || [];
+                console.log('Loaded pharmacies:', pharmaciesData);
+            } catch (e) {
+                console.log('Could not load pharmacies:', e);
             }
             
             const reservationsData = await reservationService.getMyReservations();
@@ -295,13 +343,14 @@ const handleCancelReservation = async (reservationId) => {
 
     const renderOverview = () => (
         <>
-            <div className="stats-grid">
+            <div className="stats-grid" 
+                 style={isNearbyHovered ? { marginBottom: '100px' } : {}}>
                 <div className="stat-card">
                     <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-secondary)' }}>
                         <CalendarCheck size={24} />
                     </div>
                     <div className="stat-info">
-                        <div className="stat-value">{reservations.length}</div>
+                        <div className="stat-value">{reservations.filter(r => r.status === 'PENDING' || r.status === 'CONFIRMED').length}</div>
                         <div className="stat-label">Active Reservations</div>
                     </div>
                 </div>
@@ -314,14 +363,61 @@ const handleCancelReservation = async (reservationId) => {
                         <div className="stat-label">Completed Orders</div>
                     </div>
                 </div>
-                <div className="stat-card">
+                <div className="stat-card nearby-card" 
+                     onMouseEnter={() => setIsNearbyHovered(true)}
+                     onMouseLeave={() => setIsNearbyHovered(false)}
+                     style={{ position: 'relative', cursor: 'pointer', zIndex: isNearbyHovered ? 999 : 10 }}>
                     <div className="stat-icon" style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>
                         <MapPin size={24} />
                     </div>
                     <div className="stat-info">
-                        <div className="stat-value">0</div>
+                        <div className="stat-value">{nearbyCount}</div>
                         <div className="stat-label">Nearby Pharmacies (5km)</div>
                     </div>
+                    {isNearbyHovered && pharmacies.length > 0 && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
+                            background: 'var(--dash-card)',
+                            border: '1px solid var(--dash-border)',
+                            borderRadius: '8px',
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+                            zIndex: 1001,
+                            maxHeight: '200px',
+                            overflowY: 'auto',
+                            backdropFilter: 'blur(12px)',
+                            padding: '8px 0'
+                        }}>
+                            {pharmacies.map((p, i) => (
+                                <div key={p.id || i} style={{
+                                    padding: '10px 12px',
+                                    borderBottom: i < pharmacies.length - 1 ? '1px solid var(--dash-border)' : 'none',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <span style={{ fontSize: '14px', color: 'var(--dash-text)' }}>
+                                        {p.pharmacyName || p.name || 'Pharmacy'}
+                                    </span>
+                                    {(p.latitude || p.longitude) ? (
+                                        <button
+                                            className="btn btn-primary"
+                                            style={{ fontSize: '11px', padding: '4px 10px' }}
+                                            onClick={(e) => {
+                                                window.open(`https://www.google.com/maps?q=${p.latitude},${p.longitude}`, '_blank');
+                                            }}
+                                        >
+                                            Map
+                                        </button>
+                                    ) : (
+                                        <span style={{ fontSize: '10px', color: 'var(--dash-text-muted)' }}>No loc</span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -738,7 +834,7 @@ const handleCancelReservation = async (reservationId) => {
                     </div>
                 </header>
 
-                <div className="dashboard-content">
+                <div className="dashboard-content" style={{ position: 'relative' }}>
                     {activeTab === 'overview' && renderOverview()}
                     {activeTab === 'search' && renderSearch()}
                     {activeTab === 'reservations' && renderReservations()}
