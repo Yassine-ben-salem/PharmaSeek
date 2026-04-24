@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import repositories.ClientRepository;
 import repositories.RoleRepository;
 import repositories.PharmacyRepository;
+import repositories.ReservationRepository;
 import repositories.UserRepository;
 
 import java.time.Instant;
@@ -33,6 +34,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PharmacyMapper pharmacyMapper;
+    private final ReservationRepository reservationRepository;
     private final EmailService emailService;
 
     public List<UserDto> getAllUsers() {
@@ -87,6 +89,8 @@ public class UserService {
 
         if (requestedRole == Roles.ADMIN) {
             if (currentRole == Roles.CLIENT) {
+                // Delete client's reservations first to avoid FK constraint
+                reservationRepository.deleteByClientId(userId);
                 clientRepository.deleteById(userId);
             } else if (currentRole == Roles.PHARMACY) {
                 pharmacyRepository.deleteById(userId);

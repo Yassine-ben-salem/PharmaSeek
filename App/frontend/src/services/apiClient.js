@@ -65,11 +65,14 @@ class ApiClient {
         credentials: 'include',
       });
 
-      // Handle 401 - Unauthorized (token expired)
+      // Handle 401 - Unauthorized (only redirect if not login endpoint)
       if (response.status === 401) {
-        this.setAccessToken(null);
-        window.location.href = '/login';
-        throw new Error('Session expired. Please login again.');
+        // Don't redirect for login endpoint - let it show the error
+        if (!url.includes('/auth/login')) {
+          this.setAccessToken(null);
+          window.location.href = '/login';
+        }
+        throw new Error('Invalid credentials or session expired.');
       }
 
       // Handle response

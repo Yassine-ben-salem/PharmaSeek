@@ -19,5 +19,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Modifying
     @Query("UPDATE Reservation r SET r.status = :status WHERE r.id = :id")
     int updateStatusById(@Param("id") Long id, @Param("status") String status);
+
+    void deleteByClientId(Long clientId);
 }
 

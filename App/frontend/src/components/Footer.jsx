@@ -50,7 +50,7 @@ const Footer = () => {
                     </ul>
                 </div>
 
-                <div className="footer-section contact-section">
+                {/*<div className="footer-section contact-section">
                     <h4>Contact Us</h4>
                     <div className="contact-item">
                         <Mail size={18} />
@@ -64,7 +64,7 @@ const Footer = () => {
                         <MapPin size={18} />
                         <span>123 Health Valley, Tech City</span>
                     </div>
-                </div>
+                </div>*/}
             </div>
 
             <div className="footer-bottom">

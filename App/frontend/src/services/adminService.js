@@ -44,7 +44,7 @@ const adminService = {
     },
 
     updateUserRole: async (userId, role) => {
-        const response = await apiClient.patch(`/users/${userId}/role`, {
+        const response = await apiClient.put(`/users/${userId}/role`, {
             role,
         });
         return response;

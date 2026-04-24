@@ -520,29 +520,41 @@ const handleCancelReservation = async (reservationId) => {
                         </button>
                         
                         {isScanMenuOpen && (
-                            <div className="scan-dropdown" style={{
-                                position: 'absolute',
-                                top: '100%',
-                                right: 0,
-                                marginTop: '0.5rem',
-                                background: 'var(--dash-client-sidebar)',
-                                border: '1px solid var(--dash-border)',
-                                borderRadius: '12px',
-                                padding: '0.5rem',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '0.5rem',
-                                width: '220px',
-                                zIndex: 50,
-                                boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-                            }}>
+                            <>
+                                <div 
+                                    onClick={() => setIsScanMenuOpen(false)}
+                                    style={{
+                                        position: 'fixed',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        zIndex: 9998
+                                    }}
+                                />
+                                <div className="scan-dropdown" style={{
+                                    position: 'fixed',
+                                    top: '40%',
+                                    right: '2rem',
+                                    background: 'var(--dash-client-sidebar)',
+                                    border: '1px solid var(--dash-border)',
+                                    borderRadius: '12px',
+                                    padding: '0.75rem',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '0.5rem',
+                                    width: '220px',
+                                    zIndex: 9999,
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                                }}>
                                 <button className="nav-item" onClick={() => handleScanOption('camera')} style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
                                     <Camera size={18} /> Take Photo
                                 </button>
                                 <button className="nav-item" onClick={() => handleScanOption('gallery')} style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
-                                    <ImageIcon size={18} /> Upload from Gallery
-                                </button>
-                            </div>
+                                        <ImageIcon size={18} /> Upload from Gallery
+                                    </button>
+                                </div>
+                            </>
                         )}
                         <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
                     </div>

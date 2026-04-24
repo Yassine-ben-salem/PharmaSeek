@@ -100,11 +100,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         response = await authService.registerPharmacy(userData);
       }
-      if (response) {
-        setUser({ ...response, role: userType });
-        setIsAuthenticated(true);
-        localStorage.setItem('user', JSON.stringify({ ...response, role: userType }));
-      }
+      // Don't auto-login after signup - user must login manually
       return response;
     } catch (err) {
       setError(err.message || 'Signup failed');

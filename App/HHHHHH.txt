@@ -1,0 +1,13 @@
+change search bar in admin pannel in pharmacy section
+drugs from text color in admin pannel
+add pharmacy request popup timer
+remove session expired message
+add phone in pharmcy fetching in admin pannel
+change euro to dn  in product adding in pharmacy dashboard
+remove please login in popup acc creation
+refresh stock after reservation
+change the adress of the pharmacy into the distance between the user and the pharmacy in the client dashboard
+fix dark light mode in client and pharmacydashboard 
+add quantity in reservation in client dashboard
+change the wi7da of the revenu in admin dahboard to dnt
+remove setting section in admin dashboard

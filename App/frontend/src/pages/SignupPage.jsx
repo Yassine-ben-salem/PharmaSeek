@@ -140,15 +140,21 @@ const SignupPage = () => {
             await signup(userData, role);
             
             if (role === 'pharmacy') {
-                popup.valid('Your request has been submitted! You will receive an email with the decision within 24 hours.');
+                window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'valid', message: 'Your request has been submitted! You will receive an email with the decision within 24 hours.', duration: 4000 } }));
                 navigate('/login');
             } else {
-                popup.valid('Account created successfully!');
-                navigate('/client/dashboard');
+                window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'valid', message: 'Account created successfully! Please login.', duration: 4000 } }));
+                navigate('/login');
             }
         } catch (error) {
             console.error('Signup error:', error);
-            popup.error(error.message || 'Signup failed. Please try again.');
+            window.dispatchEvent(new CustomEvent('show-popup', { 
+                detail: { 
+                    type: 'error', 
+                    message: error.message || 'Signup failed. Please try again.', 
+                    duration: 4000 
+                } 
+            }));
         } finally {
             setIsLoading(false);
         }
