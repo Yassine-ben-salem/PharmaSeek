@@ -61,6 +61,14 @@ const PharmacyDashboard = () => {
     const [inventoryData, setInventoryData] = useState([]);
     const [reservationsData, setReservationsData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    React.useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
 
     React.useEffect(() => {
         loadData();
@@ -196,10 +204,8 @@ const PharmacyDashboard = () => {
     const handleUpdateReservationStatus = async (reservationId, status) => {
         try {
             await reservationService.updateReservationStatus(reservationId, status);
-            setReservationsData(reservationsData.map(r => 
-                r.id === reservationId ? { ...r, status } : r
-            ));
             popup.valid('Reservation status updated!');
+            window.location.reload();
         } catch (error) {
             popup.error('Failed to update status: ' + error.message);
         }
@@ -401,7 +407,7 @@ const PharmacyDashboard = () => {
             <div className="section-header">
                 <h2>Product Inventory</h2>
                 <div className="action-btns">
-                    <button className="btn btn-secondary"><Filter size={18} /> Filter</button>
+                    {/*<button className="btn btn-secondary"><Filter size={18} /> Filter</button>*/}
                     <button className="btn btn-primary" onClick={openAddModal}><Plus size={18} /> Add New Product</button>
                 </div>
             </div>
@@ -458,14 +464,15 @@ const PharmacyDashboard = () => {
                 return status === 'PENDING' ? 'Waiting...' : '-';
             }
             if (!expirationTime) return 'No limit';
-            const now = new Date();
             const expires = new Date(expirationTime);
-            const diff = expires - now;
+            const diff = expires - currentTime;
             if (diff < 0) return 'Expired';
             const hours = Math.floor(diff / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
             if (hours > 0) return `${hours}h ${minutes}m`;
-            return `${minutes}m`;
+            if (minutes > 0) return `${minutes}m ${seconds}s`;
+            return `${seconds}s`;
         };
 
         const getDrugNames = (items) => {
@@ -501,7 +508,7 @@ const PharmacyDashboard = () => {
                                     <td>{res.clientName || `Client #${res.clientId}`}</td>
                                     <td>{getDrugNames(res.items)}</td>
                                     <td>
-                                        <span style={{ color: res.status === 'CONFIRMED' && res.expirationTime && new Date(res.expirationTime) < new Date() ? 'var(--danger, #dc3545)' : 'inherit' }}>
+                                        <span style={{ color: res.status === 'CONFIRMED' && res.expirationTime && new Date(res.expirationTime) < currentTime ? 'var(--danger, #dc3545)' : 'inherit' }}>
                                             {getTimeRemaining(res.expirationTime, res.status)}
                                         </span>
                                     </td>
@@ -657,10 +664,10 @@ const PharmacyDashboard = () => {
                 </nav>
 
                 <div className="sidebar-footer">
-                    <Link to="/" className="nav-item">
+                    <button className="nav-item" onClick={handleLogout}>
                         <LogOut size={20} />
                         <span>Sign Out</span>
-                    </Link>
+                    </button>
                 </div>
             </aside>
 
@@ -683,7 +690,7 @@ const PharmacyDashboard = () => {
                         <button className="btn-icon" onClick={toggleTheme} title="Toggle Theme">
                             {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                         </button>
-                        <button className="btn btn-secondary">Today's Brief</button>
+                        {/*<button className="btn btn-secondary">Today's Brief</button>*/}
                         <Link to="/" className="btn btn-outline">
                             <ArrowLeft size={16} style={{ marginRight: '8px' }} /> Landing Page
                         </Link>

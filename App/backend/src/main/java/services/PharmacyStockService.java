@@ -5,6 +5,9 @@ import dtos.PharmacyStockDto;
 import entities.Drug;
 import entities.Pharmacy;
 import entities.PharmacyStock;
+import entities.Reservation;
+import entities.ReservationItem;
+import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import mappers.DrugMapper;
 import mappers.PharmacyStockMapper;
@@ -12,9 +15,12 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import repositories.DrugRepository;
 import repositories.PharmacyRepository;
 import repositories.PharmacyStockRepository;
+import repositories.ReservationItemRepository;
+import repositories.ReservationRepository;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -31,6 +37,9 @@ public class PharmacyStockService {
     private final DrugRepository drugRepository;
     private final PharmacyStockMapper pharmacyStockMapper;
     private final DrugMapper drugMapper;
+    private final ReservationItemRepository reservationItemRepository;
+    private final ReservationRepository reservationRepository;
+    private final EntityManager entityManager;
 
     public List<PharmacyStockDto> getAllPharmacyStock() {
         return pharmacyStockRepository.findAll().stream()
@@ -177,6 +186,7 @@ public class PharmacyStockService {
                 });
     }
 
+    @Transactional
     public boolean deletePharmacyStock(Long id, Authentication authentication) {
         Long authenticatedUserId = extractAuthenticatedUserId(authentication);
         boolean admin = isAdmin(authentication);
@@ -190,6 +200,15 @@ public class PharmacyStockService {
         if (!admin && !stock.getPharmacy().getId().equals(authenticatedUserId)) {
             throw new AccessDeniedException("You can only delete stock lines for your own pharmacy.");
         }
+
+        entityManager.createNativeQuery(
+            "UPDATE reservation SET status = 'CANCELLED', updated_at = NOW() " +
+            "WHERE id IN (SELECT reservation_id FROM reservation_item WHERE stock_id = ?) " +
+            "AND status IN ('PENDING', 'CONFIRMED')"
+        ).setParameter(1, id).executeUpdate();
+
+        entityManager.createNativeQuery("DELETE FROM reservation_item WHERE stock_id = ?")
+            .setParameter(1, id).executeUpdate();
 
         pharmacyStockRepository.deleteById(id);
         return true;

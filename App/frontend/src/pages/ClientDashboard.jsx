@@ -55,6 +55,35 @@ const ClientDashboard = () => {
         phone: user?.phone || ''
     });
     const [isSaving, setIsSaving] = useState(false);
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const getDrugNames = (items) => {
+        if (!items || items.length === 0) return 'N/A';
+        return items.map(item => item.drugName).join(', ');
+    };
+
+    const getTimeRemaining = (expirationTime, status) => {
+        if (status !== 'CONFIRMED') {
+            return status === 'PENDING' ? 'Waiting...' : '-';
+        }
+        if (!expirationTime) return '-';
+        const expires = new Date(expirationTime);
+        const diff = expires - currentTime;
+        if (diff < 0) return 'Expired';
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        if (hours > 0) return `${hours}h ${minutes}m`;
+        if (minutes > 0) return `${minutes}m ${seconds}s`;
+        return `${seconds}s`;
+    };
 
     useEffect(() => {
         loadData();
@@ -308,6 +337,7 @@ const handleCancelReservation = async (reservationId) => {
                                 <th>ID</th>
                                 <th>Pharmacy</th>
                                 <th>Medicine</th>
+                                <th>Time Left</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -315,10 +345,15 @@ const handleCancelReservation = async (reservationId) => {
                             {reservations.slice(0, 3).map(res => (
                                 <tr key={res.id}>
                                     <td><strong>{res.id}</strong></td>
-                                    <td>Pharmacy #{res.pharmacyId}</td>
-                                    <td>{res.items && res.items.length > 0 ? `${res.items.length} item(s)` : 'Loading...'}</td>
+                                    <td>{res.pharmacyName || `Pharmacy #${res.pharmacyId}`}</td>
+                                    <td>{getDrugNames(res.items)}</td>
                                     <td>
-                                        <span className={`badge ${res.status === 'PICKED_UP' ? 'badge-success' : 'badge-warning'}`}>
+                                        <span style={{ color: res.status === 'CONFIRMED' && res.expirationTime && new Date(res.expirationTime) < currentTime ? 'var(--danger, #dc3545)' : 'inherit' }}>
+                                            {getTimeRemaining(res.expirationTime, res.status)}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span className={`badge ${res.status === 'DONE' ? 'badge-success' : res.status === 'CANCELLED' || res.status === 'EXPIRED' ? 'badge-danger' : 'badge-warning'}`}>
                                             {res.status}
                                         </span>
                                     </td>
@@ -413,7 +448,7 @@ const handleCancelReservation = async (reservationId) => {
                         </>
                     ) : (
                         <>
-                            <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ margin: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                 <button 
                                     className="btn btn-secondary"
                                     onClick={() => setSelectedDrug(null)}
@@ -427,7 +462,7 @@ const handleCancelReservation = async (reservationId) => {
                                 {pharmacies.length > 0 ? (
                                     pharmacies.map(pharma => (
                                         <div key={pharma.id} className="pharmacy-card" style={{ position: 'relative' }}>
-                                            <button 
+                                            {/*<button 
                                                 onClick={() => setPharmacies(pharmacies.filter(p => p.id !== pharma.id))}
                                                 style={{ 
                                                     position: 'absolute', 
@@ -441,7 +476,7 @@ const handleCancelReservation = async (reservationId) => {
                                                 }}
                                             >
                                                 <X size={18} />
-                                            </button>
+                                            </button>*/}
                                             <div 
                                                 className="pharmacy-info"
                                                 onClick={() => setExpandedPharmacy(expandedPharmacy === pharma.id ? null : pharma.id)}
@@ -500,7 +535,7 @@ const handleCancelReservation = async (reservationId) => {
                                         </div>
                                     ))
                                 ) : (
-                                    <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>No pharmacies found with this medicine in stock.</p>
+                                    <p style={{ color: 'var(--text-secondary)', margin: '1rem', justifyItems: 'center' }}>No pharmacies found with this medicine in stock.</p>
                                 )}
                             </div>
                         </>
@@ -528,6 +563,7 @@ const handleCancelReservation = async (reservationId) => {
                             <th>Pharmacy</th>
                             <th>Medicine</th>
                             <th>Date</th>
+                            <th>Time Left</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -536,18 +572,36 @@ const handleCancelReservation = async (reservationId) => {
                         {reservations.map(res => (
                             <tr key={res.id}>
                                 <td><strong>{res.id}</strong></td>
-                                <td>Pharmacy #{res.pharmacyId}</td>
-                                <td>{res.items && res.items.length > 0 ? `${res.items.length} item(s)` : 'Loading...'}</td>
+                                <td>{res.pharmacyName || `Pharmacy #${res.pharmacyId}`}</td>
+                                <td>{getDrugNames(res.items)}</td>
                                 <td>{res.reservedAt ? new Date(res.reservedAt).toLocaleDateString() : res.date}</td>
                                 <td>
-                                    <span className={`badge ${res.status === 'PICKED_UP' ? 'badge-success' : 'badge-warning'}`}>
+                                    <span style={{ color: res.status === 'CONFIRMED' && res.expirationTime && new Date(res.expirationTime) < currentTime ? 'var(--danger, #dc3545)' : 'inherit' }}>
+                                        {getTimeRemaining(res.expirationTime, res.status)}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span className={`badge ${res.status === 'DONE' ? 'badge-success' : res.status === 'CANCELLED' || res.status === 'EXPIRED' ? 'badge-danger' : 'badge-warning'}`}>
                                         {res.status}
                                     </span>
                                 </td>
                                 <td>
-                                    {res.status === 'PICKED_UP' || res.status === 'COMPLETED' ? (
-                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Pick it up!</span>
-                                    ) : (res.status === 'PENDING' || res.status === 'CONFIRMED') && (
+                                    <button 
+                                        className="btn-icon" 
+                                        title="View on Map"
+                                        onClick={() => {
+                                            if (res.pharmacyLatitude && res.pharmacyLongitude) {
+                                                window.open(`https://www.google.com/maps?q=${res.pharmacyLatitude},${res.pharmacyLongitude}`, '_blank');
+                                            }
+                                        }}
+                                        disabled={!res.pharmacyLatitude || !res.pharmacyLongitude}
+                                    >
+                                        <MapPin size={16} />
+                                    </button>
+                                    {res.status === 'CONFIRMED' && (
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginLeft: '8px' }}>Pick it up!</span>
+                                    )}
+                                    {res.status === 'PENDING' && (
                                         <button 
                                             className="btn-icon" 
                                             title="Cancel Reservation"

@@ -13,6 +13,9 @@ public class ReservationDto {
     private Long clientId;
     private String clientName;
     private Long pharmacyId;
+    private String pharmacyName;
+    private Double pharmacyLatitude;
+    private Double pharmacyLongitude;
     private String status;
     private BigDecimal totalPrice;
     

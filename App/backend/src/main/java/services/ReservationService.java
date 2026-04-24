@@ -186,17 +186,19 @@ public class ReservationService {
 
         if ("CONFIRMED".equals(targetStatus)) {
             List<ReservationItem> items = reservationItemRepository.findByReservationId(id);
-            Integer delayMinutes = items.stream()
+            System.out.println("Items found: " + items.size());
+            Integer delayHours = items.stream()
                     .map(item -> item.getStock().getReservationDelayMinutes())
                     .filter(delay -> delay != null)
                     .min(Integer::compare)
-                    .orElse(24 * 60);
-            System.out.println("Setting expiration to " + delayMinutes + " minutes for reservation " + id);
-            existingReservation.setExpirationTime(Instant.now().plusSeconds(delayMinutes.longValue() * 60));
+                    .orElse(24);
+            System.out.println("Setting expiration to " + delayHours + " hours for reservation " + id);
+            existingReservation.setExpirationTime(Instant.now().plusSeconds(delayHours.longValue() * 60 * 60));
         }
 
         existingReservation.setUpdatedAt(Instant.now());
         Reservation updatedReservation = reservationRepository.save(existingReservation);
+        System.out.println("Saved reservation expiration: " + updatedReservation.getExpirationTime());
         return Optional.of(mapWithItems(updatedReservation));
     }
 
