@@ -1,5 +1,7 @@
 package controllers;
 
+import dtos.PharmacyApprovalUpdateRequest;
+import dtos.PharmacyDto;
 import dtos.UserDto;
 import dtos.UserRoleUpdateRequest;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,6 +38,21 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserDto>> getUsersByRole(@PathVariable String role) {
         return ResponseEntity.ok(userService.getUsersByRole(role));
+    }
+
+    @GetMapping("/pharmacies/pending")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<PharmacyDto>> getPendingPharmacyRequests() {
+        return ResponseEntity.ok(userService.getPendingPharmacyRequests());
+    }
+
+    @PatchMapping("/pharmacies/{id}/approval")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PharmacyDto> updatePharmacyApprovalStatus(
+            @PathVariable Long id,
+            @RequestBody @Valid PharmacyApprovalUpdateRequest request
+    ) {
+        return ResponseEntity.ok(userService.updatePharmacyApprovalStatus(id, request.getApproved()));
     }
 
     @PutMapping("/{id}/role")

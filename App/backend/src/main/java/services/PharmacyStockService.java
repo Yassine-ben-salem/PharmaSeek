@@ -1,18 +1,26 @@
 package services;
 
+import dtos.DrugDto;
 import dtos.PharmacyStockDto;
 import entities.Drug;
 import entities.Pharmacy;
 import entities.PharmacyStock;
+import entities.Reservation;
+import entities.ReservationItem;
+import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
+import mappers.DrugMapper;
 import mappers.PharmacyStockMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import repositories.DrugRepository;
 import repositories.PharmacyRepository;
 import repositories.PharmacyStockRepository;
+import repositories.ReservationItemRepository;
+import repositories.ReservationRepository;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -28,6 +36,10 @@ public class PharmacyStockService {
     private final PharmacyRepository pharmacyRepository;
     private final DrugRepository drugRepository;
     private final PharmacyStockMapper pharmacyStockMapper;
+    private final DrugMapper drugMapper;
+    private final ReservationItemRepository reservationItemRepository;
+    private final ReservationRepository reservationRepository;
+    private final EntityManager entityManager;
 
     public List<PharmacyStockDto> getAllPharmacyStock() {
         return pharmacyStockRepository.findAll().stream()
@@ -90,6 +102,34 @@ public class PharmacyStockService {
         return pharmacyStockMapper.toPharmacyStockDto(savedPharmacyStock);
     }
 
+    public PharmacyStockDto createPharmacyStockWithNewDrug(PharmacyStockDto pharmacyStockDto, DrugDto drugDto, Authentication authentication) {
+        Long authenticatedUserId = extractAuthenticatedUserId(authentication);
+        boolean admin = isAdmin(authentication);
+
+        Long pharmacyId = admin && pharmacyStockDto.getPharmacyId() != null
+                ? pharmacyStockDto.getPharmacyId()
+                : authenticatedUserId;
+
+        Drug drug = drugMapper.toDrug(drugDto);
+        drug.setCreatedAt(Instant.now());
+        drug.setUpdatedAt(Instant.now());
+        if (drug.getRequiresPrescription() == null) {
+            drug.setRequiresPrescription(false);
+        }
+        Drug savedDrug = drugRepository.save(drug);
+
+        Pharmacy pharmacy = pharmacyRepository.findById(pharmacyId)
+                .orElseThrow(() -> new IllegalArgumentException("Pharmacy with ID " + pharmacyId + " not found."));
+
+        PharmacyStock pharmacyStock = pharmacyStockMapper.toPharmacyStock(pharmacyStockDto);
+        pharmacyStock.setPharmacy(pharmacy);
+        pharmacyStock.setDrug(savedDrug);
+        pharmacyStock.setCreatedAt(Instant.now());
+        pharmacyStock.setUpdatedAt(Instant.now());
+        PharmacyStock savedPharmacyStock = pharmacyStockRepository.save(pharmacyStock);
+        return pharmacyStockMapper.toPharmacyStockDto(savedPharmacyStock);
+    }
+
     public Optional<PharmacyStockDto> updatePharmacyStock(Long id, PharmacyStockDto pharmacyStockDto, Authentication authentication) {
         Long authenticatedUserId = extractAuthenticatedUserId(authentication);
         boolean admin = isAdmin(authentication);
@@ -146,6 +186,7 @@ public class PharmacyStockService {
                 });
     }
 
+    @Transactional
     public boolean deletePharmacyStock(Long id, Authentication authentication) {
         Long authenticatedUserId = extractAuthenticatedUserId(authentication);
         boolean admin = isAdmin(authentication);
@@ -159,6 +200,15 @@ public class PharmacyStockService {
         if (!admin && !stock.getPharmacy().getId().equals(authenticatedUserId)) {
             throw new AccessDeniedException("You can only delete stock lines for your own pharmacy.");
         }
+
+        entityManager.createNativeQuery(
+            "UPDATE reservation SET status = 'CANCELLED', updated_at = NOW() " +
+            "WHERE id IN (SELECT reservation_id FROM reservation_item WHERE stock_id = ?) " +
+            "AND status IN ('PENDING', 'CONFIRMED')"
+        ).setParameter(1, id).executeUpdate();
+
+        entityManager.createNativeQuery("DELETE FROM reservation_item WHERE stock_id = ?")
+            .setParameter(1, id).executeUpdate();
 
         pharmacyStockRepository.deleteById(id);
         return true;
@@ -182,10 +232,11 @@ public class PharmacyStockService {
     public List<PharmacyStockDto> getPharmacyStockByDrugId(Long drugId, Authentication authentication) {
         Long authenticatedUserId = extractAuthenticatedUserId(authentication);
         boolean admin = isAdmin(authentication);
+        boolean client = isClient(authentication);
         if (drugRepository.findById(drugId).isEmpty()) {
             throw new IllegalArgumentException("Drug with ID " + drugId + " not found.");
         }
-        if (admin) {
+        if (admin || client) {
             return pharmacyStockRepository.findByDrugId(drugId).stream()
                     .map(pharmacyStockMapper::toPharmacyStockDto)
                     .collect(Collectors.toList());
@@ -194,6 +245,43 @@ public class PharmacyStockService {
         return pharmacyStockRepository.findByPharmacyIdAndDrugId(authenticatedUserId, drugId)
                 .map(stock -> List.of(pharmacyStockMapper.toPharmacyStockDto(stock)))
                 .orElse(Collections.emptyList());
+    }
+
+    public List<DrugDto> autocompleteDrugs(String name) {
+        return pharmacyStockRepository.findByDrugNameContainingIgnoreCase(name).stream()
+                .map(stock -> drugMapper.toDrugDto(stock.getDrug()))
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public List<PharmacyStockDto> getMyPharmacyStock(Authentication authentication) {
+        Long pharmacyId = extractAuthenticatedUserId(authentication);
+        return getPharmacyStockByPharmacyId(pharmacyId, authentication);
+    }
+
+    public List<PharmacyStockDto> getNearbyPharmaciesWithDrug(Long drugId, Double userLat, Double userLng, double radiusKm) {
+        if (userLat == null || userLng == null) {
+            return pharmacyStockRepository.findByDrugId(drugId).stream()
+                    .map(pharmacyStockMapper::toPharmacyStockDto)
+                    .collect(Collectors.toList());
+        }
+        
+        return pharmacyStockRepository.findByDrugId(drugId).stream()
+                .map(pharmacyStockMapper::toPharmacyStockDto)
+                .filter(dto -> dto.getLatitude() != null && dto.getLongitude() != null)
+                .filter(dto -> calculateDistance(userLat, userLng, dto.getLatitude(), dto.getLongitude()) <= radiusKm)
+                .collect(Collectors.toList());
+    }
+
+    private double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
+        final int R = 6371;
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lngDistance = Math.toRadians(lng2 - lng1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 
     private Long extractAuthenticatedUserId(Authentication authentication) {
@@ -223,6 +311,15 @@ public class PharmacyStockService {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch("ROLE_ADMIN"::equals);
+    }
+
+    private boolean isClient(Authentication authentication) {
+        if (authentication == null || authentication.getAuthorities() == null) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ROLE_CLIENT"::equals);
     }
 }
 

@@ -1,5 +1,6 @@
 package dtos;
 
+import entities.PharmacyApprovalStatus;
 import lombok.Value;
 
 @Value
@@ -9,4 +10,9 @@ public class PharmacyDto {
     String taxId;
     String email;
     String address;
+    String phone;
+    String operatingHours;
+    Double latitude;
+    Double longitude;
+    PharmacyApprovalStatus approvalStatus;
 }

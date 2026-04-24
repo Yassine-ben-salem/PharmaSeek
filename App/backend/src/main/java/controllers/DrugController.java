@@ -53,7 +53,7 @@ public class DrugController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<DrugDto> getDrugByName(@RequestParam String name) {
+    public ResponseEntity<List<DrugDto>> getDrugByName(@RequestParam String name) {
         return drugService.getDrugByName(name);
     }
 }

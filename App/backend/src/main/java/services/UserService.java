@@ -1,18 +1,24 @@
 package services;
 
+import dtos.PharmacyDto;
 import dtos.UserDto;
+import entities.PharmacyApprovalStatus;
 import entities.Role;
 import entities.Roles;
 import exceptions.UserNotFoundException;
 import lombok.AllArgsConstructor;
+import mappers.PharmacyMapper;
 import mappers.UserMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import repositories.RoleRepository;
+import repositories.PharmacyRepository;
 import repositories.UserRepository;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +28,9 @@ import java.util.Set;
 public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PharmacyRepository pharmacyRepository;
     private final UserMapper userMapper;
+    private final PharmacyMapper pharmacyMapper;
 
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream()
@@ -75,6 +83,25 @@ public class UserService {
         user.setRoles(new HashSet<>(Set.of(role)));
         var savedUser = userRepository.save(user);
         return userMapper.toUserDto(savedUser);
+    }
+
+    public List<PharmacyDto> getPendingPharmacyRequests() {
+        return pharmacyRepository.findByApprovalStatus(PharmacyApprovalStatus.PENDING)
+                .stream()
+                .map(pharmacyMapper::toPharmacyDto)
+                .toList();
+    }
+
+    @Transactional
+    public PharmacyDto updatePharmacyApprovalStatus(Long pharmacyId, boolean approved) {
+        var pharmacy = pharmacyRepository.findById(pharmacyId)
+                .orElseThrow(() -> new UserNotFoundException(pharmacyId));
+
+        pharmacy.setApprovalStatus(approved ? PharmacyApprovalStatus.APPROVED : PharmacyApprovalStatus.REJECTED);
+        pharmacy.setUpdatedAt(Instant.now().plus(1, ChronoUnit.HOURS));
+
+        var savedPharmacy = pharmacyRepository.save(pharmacy);
+        return pharmacyMapper.toPharmacyDto(savedPharmacy);
     }
 
     private boolean isAdmin(Authentication authentication) {

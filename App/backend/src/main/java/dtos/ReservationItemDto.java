@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 public class ReservationItemDto {
     private Long id;
     private Long drugId;
+    private String drugName;
     private Integer quantity;
     private BigDecimal priceAtReservation;
 }
