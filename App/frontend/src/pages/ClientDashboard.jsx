@@ -243,7 +243,7 @@ const ClientDashboard = () => {
                 })
                 .catch(err => {
                     console.error("Camera error:", err);
-                    alert("Could not access the camera. Please allow camera permissions or check your device.");
+                    window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'error', message: "Could not access the camera. Please allow camera permissions", duration: 4000 } }));
                     setIsCameraModalOpen(false);
                 });
         }
@@ -254,8 +254,7 @@ const ClientDashboard = () => {
 
     const capturePhoto = () => {
         setIsCameraModalOpen(false);
-        alert(`Scanning photo from camera... Medicine detected: Amoxicillin`);
-        setSearchQuery("Amoxicillin");
+        window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'info', message: 'Photo captured! Use gallery for AI detection', duration: 3000 } }));
     };
 
     const closeCamera = () => {
@@ -346,9 +345,9 @@ const handleCancelReservation = async (reservationId) => {
             setReservations(reservations.map(r => 
                 r.id === reservationId ? { ...r, status: 'CANCELLED' } : r
             ));
-            alert('Reservation cancelled');
+            window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'valid', message: 'Reservation cancelled', duration: 3000 } }));
         } catch (error) {
-            alert('Failed to cancel reservation: ' + error.message);
+            window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'error', message: 'Failed to cancel reservation', duration: 4000 } }));
         }
     };
 
@@ -357,11 +356,11 @@ const handleCancelReservation = async (reservationId) => {
         try {
             const updatedUser = await clientService.updateMyProfile(settingsForm);
             localStorage.setItem('user', JSON.stringify(updatedUser));
-            alert('Settings saved successfully!');
+            window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'valid', message: 'Settings saved successfully!', duration: 3000 } }));
             setIsSaving(false);
             window.location.reload();
         } catch (error) {
-            alert('Failed to save settings: ' + error.message);
+            window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'error', message: 'Failed to save settings', duration: 4000 } }));
             setIsSaving(false);
         }
     };
