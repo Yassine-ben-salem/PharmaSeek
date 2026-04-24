@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.mapstruct.Mapping;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -53,6 +54,11 @@ public class AuthController {
     @GetMapping("/current")
     public ResponseEntity<UserDto> current(Authentication authentication) {
         return ResponseEntity.ok(authService.getCurrentUser(authentication));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity getCurrentUserProfile(Authentication authentication) {
+        return ResponseEntity.ok(authService.getCurrentUserProfile(authentication));
     }
 
     @PostMapping("/logout")

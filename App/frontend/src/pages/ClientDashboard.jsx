@@ -17,12 +17,15 @@ import {
     Moon,
     Scan,
     Camera,
-    Image as ImageIcon
+    Image as ImageIcon,
+    ChevronDown,
+    ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import drugService from '../services/drugService';
 import reservationService from '../services/reservationService';
 import pharmacyStockService from '../services/pharmacyStockService';
+import clientService from '../services/clientService';
 import usePopUp from '../components/usePopUp';
 import './ClientDashboard.css';
 
@@ -43,11 +46,68 @@ const ClientDashboard = () => {
     const [reservations, setReservations] = useState([]);
     const [drugs, setDrugs] = useState([]);
     const [pharmacies, setPharmacies] = useState([]);
+    const [selectedDrug, setSelectedDrug] = useState(null);
+    const [expandedPharmacy, setExpandedPharmacy] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [settingsForm, setSettingsForm] = useState({
+        name: user?.name || user?.firstName || '',
+        email: user?.email || '',
+        phone: user?.phone || ''
+    });
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         loadData();
     }, []);
+
+    useEffect(() => {
+        const fetchSearchResults = async () => {
+            if (searchQuery.trim()) {
+                setIsLoading(true);
+                try {
+                    const searchResult = await drugService.searchDrugs(searchQuery);
+                    if (searchResult && searchResult.length > 0) {
+                        setDrugs(searchResult);
+                    } else {
+                        setDrugs([]);
+                    }
+                    setSelectedDrug(null);
+                    setPharmacies([]);
+                } catch (error) {
+                    console.error('Search error:', error);
+                    setDrugs([]);
+                } finally {
+                    setIsLoading(false);
+                }
+            } else {
+                setDrugs([]);
+                setSelectedDrug(null);
+                setPharmacies([]);
+            }
+        };
+
+        const timeoutId = setTimeout(fetchSearchResults, 300);
+        return () => clearTimeout(timeoutId);
+    }, [searchQuery]);
+
+    const handleDrugClick = async (drug) => {
+        setSelectedDrug(drug);
+        setIsLoading(true);
+        try {
+            let pharmaciesData;
+            if (user?.latitude && user?.longitude) {
+                pharmaciesData = await pharmacyStockService.getNearbyPharmacies(drug.id, user.latitude, user.longitude);
+            } else {
+                pharmaciesData = await pharmacyStockService.getPharmaciesWithDrug(drug.id);
+            }
+            setPharmacies(pharmaciesData || []);
+        } catch (error) {
+            console.error('Error fetching pharmacies:', error);
+            setPharmacies([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const loadData = async (query = '') => {
         setIsLoading(true);
@@ -149,11 +209,7 @@ const ClientDashboard = () => {
         }
     };
 
-    const filteredPharmacies = Array.isArray(pharmacies) && searchQuery 
-        ? pharmacies.filter(pharma => 
-            pharma.stock && pharma.stock.some(med => med.drugName?.toLowerCase().includes(searchQuery.toLowerCase()))
-        )
-        : [];
+    const filteredPharmacies = searchQuery ? (Array.isArray(pharmacies) ? pharmacies : []) : [];
 
     const handleReserve = async (pharmacy, medicineName) => {
         try {
@@ -177,13 +233,29 @@ const ClientDashboard = () => {
         }
     };
 
-    const handleCancelReservation = async (reservationId) => {
+const handleCancelReservation = async (reservationId) => {
         try {
             await reservationService.cancelReservation(reservationId);
-            setReservations(reservations.filter(r => r.id !== reservationId));
-            popup.valid('Reservation cancelled');
+            setReservations(reservations.map(r => 
+                r.id === reservationId ? { ...r, status: 'CANCELLED' } : r
+            ));
+            alert('Reservation cancelled');
         } catch (error) {
-            popup.error('Failed to cancel reservation: ' + error.message);
+            alert('Failed to cancel reservation: ' + error.message);
+        }
+    };
+
+    const handleSaveSettings = async () => {
+        setIsSaving(true);
+        try {
+            const updatedUser = await clientService.updateMyProfile(settingsForm);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            alert('Settings saved successfully!');
+            setIsSaving(false);
+            window.location.reload();
+        } catch (error) {
+            alert('Failed to save settings: ' + error.message);
+            setIsSaving(false);
         }
     };
 
@@ -209,7 +281,7 @@ const ClientDashboard = () => {
                         <CheckCircle2 size={24} />
                     </div>
                     <div className="stat-info">
-                        <div className="stat-value">5</div>
+                        <div className="stat-value">{reservations.filter(r => r.status === 'PICKED_UP' || r.status === 'COMPLETED').length}</div>
                         <div className="stat-label">Completed Orders</div>
                     </div>
                 </div>
@@ -218,8 +290,8 @@ const ClientDashboard = () => {
                         <MapPin size={24} />
                     </div>
                     <div className="stat-info">
-                        <div className="stat-value">12</div>
-                        <div className="stat-label">Nearby Pharmacies</div>
+                        <div className="stat-value">0</div>
+                        <div className="stat-label">Nearby Pharmacies (5km)</div>
                     </div>
                 </div>
             </div>
@@ -243,10 +315,10 @@ const ClientDashboard = () => {
                             {reservations.slice(0, 3).map(res => (
                                 <tr key={res.id}>
                                     <td><strong>{res.id}</strong></td>
-                                    <td>{res.pharmacy}</td>
-                                    <td>{res.medicine}</td>
+                                    <td>Pharmacy #{res.pharmacyId}</td>
+                                    <td>{res.items && res.items.length > 0 ? `${res.items.length} item(s)` : 'Loading...'}</td>
                                     <td>
-                                        <span className={`badge ${res.status === 'Ready' ? 'badge-success' : 'badge-warning'}`}>
+                                        <span className={`badge ${res.status === 'PICKED_UP' ? 'badge-success' : 'badge-warning'}`}>
                                             {res.status}
                                         </span>
                                     </td>
@@ -260,9 +332,11 @@ const ClientDashboard = () => {
     );
 
     const renderSearch = () => (
-        <div className="section-container">
-            <div className="section-header">
-                <h2>Search Medicines</h2>
+        <>
+            <div className="section-container">
+                <div className="section-header">
+                    <h2>Search Medicines</h2>
+                </div>
                 <div className="search-bar" style={{ position: 'relative', width: '100%', maxWidth: '500px', display: 'flex', gap: '0.8rem' }}>
                     <div style={{ position: 'relative', flex: 1 }}>
                         <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)' }} />
@@ -316,46 +390,121 @@ const ClientDashboard = () => {
 
             {searchQuery ? (
                 <div className="search-results">
-                    <h3>Pharmacies with "{searchQuery}" in stock:</h3>
-                    <div className="search-results-grid">
-                        {filteredPharmacies.length > 0 ? (
-                            filteredPharmacies.map(pharma => (
-                                <div key={pharma.id} className="pharmacy-card">
-                                    <div className="pharmacy-info">
-                                        <h3>{pharma.name}</h3>
-                                        <p><MapPin size={14} /> {pharma.address}</p>
-                                        <p><Navigation size={14} /> {pharma.distance} away</p>
-                                    </div>
-                                    <div className="stock-status">
-                                        <span className="badge badge-success">In Stock</span>
-                                        <div className="action-btns" style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-                                            <button
-                                                className="btn btn-secondary"
-                                                style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', flex: 1 }}
-                                                onClick={() => openMap(pharma)}
-                                            >
-                                                <MapPin size={14} style={{ marginRight: '4px' }} /> See Location
-                                            </button>
-                                            <button
-                                                className="btn btn-primary"
-                                                style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', flex: 1 }}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setCurrentMedicine(searchQuery);
-                                                    setSelectedPharmacy(pharma);
-                                                    setIsReserveModalOpen(true);
+                    {!selectedDrug ? (
+                        <>
+                            {/*<h3>Medicines matching "{searchQuery}":</h3>*/}
+                            <div className="search-results-grid">
+                                {drugs.length > 0 ? (
+                                    drugs.map(drug => (
+                                        <div key={drug.id} className="pharmacy-card" onClick={() => handleDrugClick(drug)} style={{ cursor: 'pointer' }}>
+                                            <div className="pharmacy-info">
+                                                <h3>{drug.name}</h3>
+                                                <p>{drug.description || 'No description available'}</p>
+                                                {drug.requiresPrescription && (
+                                                    <span className="badge badge-warning">Requires Prescription</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>No medicines found matching "{searchQuery}"</p>
+                                )}
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <button 
+                                    className="btn btn-secondary"
+                                    onClick={() => setSelectedDrug(null)}
+                                    style={{ padding: '0.5rem 1rem' }}
+                                >
+                                    ← Back
+                                </button>
+                                <h3>Pharmacies with "{selectedDrug.name}" in stock:</h3>
+                            </div>
+<div className="search-results-grid">
+                                {pharmacies.length > 0 ? (
+                                    pharmacies.map(pharma => (
+                                        <div key={pharma.id} className="pharmacy-card" style={{ position: 'relative' }}>
+                                            <button 
+                                                onClick={() => setPharmacies(pharmacies.filter(p => p.id !== pharma.id))}
+                                                style={{ 
+                                                    position: 'absolute', 
+                                                    top: '8px', 
+                                                    right: '8px',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    cursor: 'pointer',
+                                                    color: 'var(--text-secondary)',
+                                                    padding: '4px'
                                                 }}
                                             >
-                                                Reserve Now
+                                                <X size={18} />
                                             </button>
+                                            <div 
+                                                className="pharmacy-info"
+                                                onClick={() => setExpandedPharmacy(expandedPharmacy === pharma.id ? null : pharma.id)}
+                                                style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '2rem' }}
+                                            >
+                                                <div>
+                                                    <h3>{pharma.pharmacyName || 'Pharmacy'}</h3>
+                                                    <p><MapPin size={14} /> {pharma.pharmacyAddress || 'Address not available'}</p>
+                                                </div>
+                                                <ChevronDown 
+                                                    size={20} 
+                                                    style={{ 
+                                                        transform: expandedPharmacy === pharma.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                        transition: 'transform 0.2s',
+                                                        flexShrink: 0
+                                                    }} 
+                                                />
+                                            </div>
+                                            {expandedPharmacy === pharma.id && pharma.latitude && pharma.longitude && (
+                                                <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+                                                    <a 
+                                                        href={`https://www.google.com/maps?q=${pharma.latitude},${pharma.longitude}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)', textDecoration: 'none' }}
+                                                    >
+                                                        <ExternalLink size={16} />
+                                                        Open in Google Maps
+                                                    </a>
+                                                </div>
+                                            )}
+                                            
+                                            <div className="stock-status">
+                                                {pharma.quantity > 0 ? (
+                                                    <span className="badge badge-success">In Stock</span>
+                                                ) : (
+                                                    <span className="badge badge-danger">Out of Stock</span>
+                                                )}
+                                                <p>Price: ${pharma.price}</p>
+                                                <div className="action-btns" style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                                    {pharma.quantity > 0 && (
+                                                        <button
+                                                            className="btn btn-primary"
+                                                            style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', flex: 1 }}
+                                                            onClick={(e) => {
+                                                                setSelectedPharmacy(pharma);
+                                                                setCurrentMedicine(selectedDrug.name);
+                                                                setIsReserveModalOpen(true);
+                                                            }}
+                                                        >
+                                                            Reserve Now
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>No pharmacies found with this medicine in stock.</p>
-                        )}
-                    </div>
+                                    ))
+                                ) : (
+                                    <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>No pharmacies found with this medicine in stock.</p>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             ) : (
                 <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
@@ -363,7 +512,7 @@ const ClientDashboard = () => {
                     <p>Enter a medicine name to see available pharmacies nearby.</p>
                 </div>
             )}
-        </div>
+        </>
     );
 
     const renderReservations = () => (
@@ -387,19 +536,25 @@ const ClientDashboard = () => {
                         {reservations.map(res => (
                             <tr key={res.id}>
                                 <td><strong>{res.id}</strong></td>
-                                <td>{res.pharmacy}</td>
-                                <td>{res.medicine}</td>
-                                <td>{res.date}</td>
+                                <td>Pharmacy #{res.pharmacyId}</td>
+                                <td>{res.items && res.items.length > 0 ? `${res.items.length} item(s)` : 'Loading...'}</td>
+                                <td>{res.reservedAt ? new Date(res.reservedAt).toLocaleDateString() : res.date}</td>
                                 <td>
-                                    <span className={`badge ${res.status === 'Ready' ? 'badge-success' : 'badge-warning'}`}>
+                                    <span className={`badge ${res.status === 'PICKED_UP' ? 'badge-success' : 'badge-warning'}`}>
                                         {res.status}
                                     </span>
                                 </td>
                                 <td>
-                                    {res.status === 'Ready' ? (
+                                    {res.status === 'PICKED_UP' || res.status === 'COMPLETED' ? (
                                         <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Pick it up!</span>
-                                    ) : (
-                                        <button className="btn-icon" title="Cancel Reservation"><X size={16} /></button>
+                                    ) : (res.status === 'PENDING' || res.status === 'CONFIRMED') && (
+                                        <button 
+                                            className="btn-icon" 
+                                            title="Cancel Reservation"
+                                            onClick={() => handleCancelReservation(res.id)}
+                                        >
+                                            <X size={16} />
+                                        </button>
                                     )}
                                 </td>
                             </tr>
@@ -415,28 +570,37 @@ const ClientDashboard = () => {
             <div className="section-header">
                 <h2>Account Settings</h2>
             </div>
-            <form style={{ maxWidth: '600px' }}>
+<form style={{ maxWidth: '600px' }} onSubmit={(e) => { e.preventDefault(); handleSaveSettings(); }}>
                 <div className="form-group">
                     <label>Full Name</label>
-                    <input type="text" defaultValue="John Doe" />
+                    <input 
+                        type="text" 
+                        value={settingsForm.name}
+                        onChange={(e) => setSettingsForm({...settingsForm, name: e.target.value})}
+                        placeholder="Enter your full name"
+                    />
                 </div>
                 <div className="form-group">
                     <label>Email Address</label>
-                    <input type="email" defaultValue="john.doe@example.com" />
+                    <input 
+                        type="email" 
+                        value={settingsForm.email}
+                        onChange={(e) => setSettingsForm({...settingsForm, email: e.target.value})}
+                        placeholder="Enter your email"
+                    />
                 </div>
                 <div className="form-group">
                     <label>Phone Number</label>
-                    <input type="tel" defaultValue="+33 6 12 34 56 78" />
+                    <input 
+                        type="tel" 
+                        value={settingsForm.phone}
+                        onChange={(e) => setSettingsForm({...settingsForm, phone: e.target.value})}
+                        placeholder="Enter your phone number"
+                    />
                 </div>
-                <div className="form-group">
-                    <label>Preferred Pharmacy</label>
-                    <select>
-                        <option>City Pharma</option>
-                        <option>Green Cross</option>
-                        <option>HealthFirst</option>
-                    </select>
-                </div>
-                <button className="btn btn-primary" type="button" onClick={() => alert('Settings saved!')}>Save Changes</button>
+                <button className="btn btn-primary" type="submit" disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save Changes'}
+                </button>
             </form>
         </div>
     );
@@ -500,7 +664,7 @@ const ClientDashboard = () => {
                 <header className="dashboard-header">
                     <div className="header-title">
                         <h1>
-                            {activeTab === 'overview' ? 'Hello, John!' :
+                            {activeTab === 'overview' ? 'Hello'+', ' + user?.name + '!' :
                                 activeTab === 'search' ? 'Find Your Medicine' :
                                     activeTab === 'reservations' ? 'Your Reservations' : 'Settings'}
                         </h1>
@@ -557,11 +721,12 @@ const ClientDashboard = () => {
                     <div className="modal-overlay" onClick={() => setIsReserveModalOpen(false)}>
                         <div className="modal-content" onClick={e => e.stopPropagation()}>
                             <h2>Confirm Reservation</h2>
-                            <p>You are about to reserve <strong>{currentMedicine}</strong> at <strong>{selectedPharmacy.name}</strong>.</p>
+                            <p>You are about to reserve <strong>{currentMedicine}</strong> at <strong>{selectedPharmacy.pharmacyName}</strong>.</p>
                             <p style={{ margin: '1rem 0', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '12px', fontSize: '0.9rem' }}>
                                 <Clock size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-                                The reservation will be valid for 24 hours.
+                                The reservation will be valid for {selectedPharmacy.reservationDelayMinutes || 24} hours.
                             </p>
+                            <p>Price: ${selectedPharmacy.price}</p>
                             <div className="form-actions">
                                 <button className="btn btn-outline" onClick={() => setIsReserveModalOpen(false)}>Cancel</button>
                                 <button className="btn btn-primary" onClick={() => handleReserve(selectedPharmacy, currentMedicine)}>Confirm Reservation</button>

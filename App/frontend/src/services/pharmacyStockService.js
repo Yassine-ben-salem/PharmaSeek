@@ -55,7 +55,7 @@ const pharmacyStockService = {
   },
 
   /**
-   * Add stock item
+   * Add stock item with existing drug
    */
   addStock: async (stockData) => {
     const response = await apiClient.post('/pharmacy-stock', {
@@ -63,6 +63,28 @@ const pharmacyStockService = {
       quantity: stockData.quantity,
       price: stockData.price,
       reservationDelayMinutes: stockData.reservationDelayMinutes || 24,
+    });
+    return response;
+  },
+
+  /**
+   * Add stock item and create new drug in one step
+   */
+  addStockWithDrug: async (drugData, stockData) => {
+    const response = await apiClient.post('/pharmacy-stock/with-drug', {
+      drug: {
+        name: drugData.name,
+        description: drugData.description,
+        category: drugData.category,
+        manufacturer: drugData.manufacturer,
+        barCode: drugData.barCode || null,
+        requiresPrescription: drugData.requiresPrescription || false,
+      },
+      stock: {
+        quantity: stockData.quantity,
+        price: stockData.price,
+        reservationDelayMinutes: stockData.reservationDelayMinutes || 24,
+      },
     });
     return response;
   },
@@ -84,6 +106,19 @@ const pharmacyStockService = {
    */
   deleteStock: async (stockId) => {
     const response = await apiClient.delete(`/pharmacy-stock/${stockId}`);
+    return response;
+  },
+
+  /**
+   * Autocomplete drug names from stock table
+   */
+  autocompleteDrugs: async (name) => {
+    const response = await apiClient.get(`/pharmacy-stock/autocomplete?name=${encodeURIComponent(name)}`);
+    return response;
+  },
+
+  getNearbyPharmacies: async (drugId, latitude, longitude) => {
+    const response = await apiClient.get(`/pharmacy-stock/nearby/${drugId}?latitude=${latitude}&longitude=${longitude}`);
     return response;
   },
 };

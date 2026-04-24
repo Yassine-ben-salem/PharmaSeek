@@ -238,10 +238,10 @@ public class AuthService {
         pharmacy.setUser(savedUser);
         pharmacy.setPharmacyName(request.getPharmacyName());
         pharmacy.setTaxId(request.getTaxId());
-        pharmacy.setEmail(request.getEmail().toLowerCase().trim());
+        /*pharmacy.setEmail(request.getEmail().toLowerCase().trim());*/
         pharmacy.setAddress(request.getAddress());
-        pharmacy.setLatitude(request.getLatitude() != null ? request.getLatitude() : BigDecimal.ZERO);
-        pharmacy.setLongitude(request.getLongitude() != null ? request.getLongitude() : BigDecimal.ZERO);
+        pharmacy.setLatitude(request.getLatitude() != null ? request.getLatitude().doubleValue() : 0.0);
+        pharmacy.setLongitude(request.getLongitude() != null ? request.getLongitude().doubleValue() : 0.0);
         pharmacy.setSchedule(null);
         pharmacy.setApprovalStatus(PharmacyApprovalStatus.PENDING);
         pharmacy.setCreatedAt(persistedAt);
@@ -297,5 +297,20 @@ public class AuthService {
         userRepository.save(user);
 
         passwordResetTokenRepository.delete(resetToken);
+    }
+    public Object getCurrentUserProfile(Authentication authentication) {
+        Long userId = resolveAuthenticatedUserId(authentication);
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        if(user.getRole() == Roles.CLIENT) {
+            return clientRepository.findById(userId)
+                    .map(clientMapper::toClientDto)
+                    .orElseThrow(() -> new RuntimeException("Client not found"));
+        }
+        else{
+            return pharmacyRepository.findById(userId)
+                    .map(pharmacyMapper::toPharmacyDto)
+                    .orElseThrow(() -> new RuntimeException("Pharmacy not found"));
+        }
     }
 }

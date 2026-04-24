@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Pill, Activity, Sun, Moon } from 'lucide-react';
+import { Menu, X, Pill, Activity, Sun, Moon, User, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -9,6 +10,9 @@ const Navbar = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const location = useLocation();
+    const navigate = useNavigate();
+    const { user, isAuthenticated, logout } = useAuth();
+    const userRole = user?.role;
 
     const [activeSection, setActiveSection] = useState('home');
 
@@ -116,8 +120,24 @@ const Navbar = () => {
                     >
                         {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                     </button>
-                    <Link to="/login" className="btn-nav btn-login">Login</Link>
-                    <Link to="/signup" className="btn-nav btn-signup">Get Started</Link>
+                    {isAuthenticated ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <User size={18} />
+                            <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{user?.name?.split(' ')[0] || userRole}</span>
+                            <button
+                                className="btn-nav btn-logout"
+                                onClick={async () => { await logout(); navigate('/'); }}
+                                style={{ marginLeft: '0.5rem' }}
+                            >
+                                <LogOut size={16} />
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <Link to="/login" className="btn-nav btn-login">Login</Link>
+                            <Link to="/signup" className="btn-nav btn-signup">Get Started</Link>
+                        </>
+                    )}
                 </div>
 
                 {/* Mobile Menu Toggle */}

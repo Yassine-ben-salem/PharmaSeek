@@ -1,115 +1,102 @@
 import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import PharmacyElements from '../components/3d/PharmacyElements';
 import ClientElements from '../components/3d/ClientElements';
-import DataStream from '../components/animations/DataStream';
 import LivingBackground from '../components/animations/LivingBackground';
 import Navbar from '../components/Navbar';
 import AboutSection from '../components/AboutSection';
 import ContactSection from '../components/ContactSection';
 import Footer from '../components/Footer';
+import usePopUp from '../components/usePopUp';
 import './LandingPage.css';
+
+const PARTICLE_COUNT = 20;
+
+const PARTICLE_POSITIONS = Array.from({ length: PARTICLE_COUNT }, () => ({
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    delay: Math.random() * 5
+}));
 
 const LandingPage = () => {
     const heroRef = useRef(null);
-    const { scrollYProgress } = useScroll({
-        target: heroRef,
-        offset: ["start start", "end start"]
-    });
-
-    // Transformations based on scroll
-    const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-    const scale = useTransform(scrollYProgress, [0, 0.8], [1, 0.95]);
-    const y = useTransform(scrollYProgress, [0, 0.8], [0, -50]);
-    const bridgeOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+    const { user, isAuthenticated } = useAuth();
+    const { popup } = usePopUp();
+    const userRole = user?.role;
 
     return (
         <div className="landing-page-3d">
             <Navbar />
 
-            {/* Hero Section */}
             <div className="hero-section" id="home" ref={heroRef}>
-                {/* Background Particles */}
-                <motion.div className="particles" style={{ opacity }}>
-                    {[...Array(20)].map((_, i) => (
-                        <div key={i} className="particle" style={{
-                            top: `${Math.random() * 100}%`,
-                            left: `${Math.random() * 100}%`,
-                            animationDelay: `${Math.random() * 5}s`
+                <div className="particles">
+                    {PARTICLE_POSITIONS.map((pos) => (
+                        <div key={pos.top + pos.left} className="particle" style={{
+                            top: `${pos.top}%`,
+                            left: `${pos.left}%`,
+                            animationDelay: `${pos.delay}s`
                         }}></div>
                     ))}
-                </motion.div>
+                </div>
 
-                {/* Left Side: Pharmacy */}
-                <motion.div
-                    className="split-side pharmacy-side"
-                    style={{ opacity, scale, y }}
-                >
+                <div className="split-side pharmacy-side">
                     <LivingBackground theme="pharmacy" />
                     <div className="content-wrapper">
-                        <motion.div
-                            className="text-content"
-                            initial={{ x: -50, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                        >
+                        <div className="text-content">
                             <h2>Pharmacy</h2>
                             <p>Intelligence for modern pharmacies.</p>
-                            <Link to="/pharmacy" className="btn-3d btn-pharmacy">
-                                Access Dashboard
-                            </Link>
-                        </motion.div>
+                            <button 
+                                className="btn-3d btn-pharmacy"
+                                onClick={() => {
+                                    if (isAuthenticated && userRole === 'PHARMACY') {
+                                        window.location.href = '/pharmacy';
+                                    } else if (isAuthenticated && userRole === 'CLIENT') {
+                                        popup.error('This dashboard is for pharmacies only. Please login as a pharmacy to access.');
+                                    } else {
+                                        window.location.href = '/login';
+                                    }
+                                }}
+                            >
+                                {isAuthenticated && userRole === 'PHARMACY' ? 'Access Dashboard' : 'Login to Access'}
+                            </button>
+                        </div>
                         <div className="visual-content">
                             <PharmacyElements />
                         </div>
                     </div>
-                </motion.div>
+                </div>
 
-                {/* Separator Effect */}
-                <motion.div className="split-separator" style={{ opacity }} />
+                <div className="split-separator" />
 
-                {/* Right Side: Client */}
-                <motion.div
-                    className="split-side client-side"
-                    style={{ opacity, scale, y }}
-                >
+                <div className="split-side client-side">
                     <LivingBackground theme="client" />
                     <div className="content-wrapper">
                         <div className="visual-content">
                             <ClientElements />
                         </div>
-                        <motion.div
-                            className="text-content"
-                            initial={{ x: 50, opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.4 }}
-                        >
+                        <div className="text-content">
                             <h2>Patient App</h2>
                             <p>Your health, simplified.</p>
-                            <Link to="/client" className="btn-3d btn-client">
-                                Open App
-                            </Link>
-                        </motion.div>
+                            <button 
+                                className="btn-3d btn-client"
+                                onClick={() => {
+                                    if (isAuthenticated && userRole === 'CLIENT') {
+                                        window.location.href = '/client';
+                                    } else if (isAuthenticated && userRole === 'PHARMACY') {
+                                        popup.error('This app is for patients only. Please login as a client to access.');
+                                    } else {
+                                        window.location.href = '/login';
+                                    }
+                                }}
+                            >
+                                {isAuthenticated && userRole === 'CLIENT' ? 'Open App' : 'Login to Access'}
+                            </button>
+                        </div>
                     </div>
-                </motion.div>
-
-                {/* Center Bridge Overlay (animation pharmaseek) 
-                <motion.div className="bridge-overlay" style={{ opacity: bridgeOpacity, scale }}>
-                    <div className="logo-container">
-                        <motion.h1
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 1 }}
-                        >
-                            PharmaSeek
-                        </motion.h1>
-                        <DataStream />
-                    </div>
-                </motion.div>*/}
+                </div>
             </div>
 
-            {/* Content Sections */}
             <AboutSection />
             <ContactSection />
             <Footer />

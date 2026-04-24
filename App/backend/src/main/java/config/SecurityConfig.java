@@ -47,9 +47,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/drugs", "/drugs/**").hasAnyRole("PHARMACY", "ADMIN")
-                        .requestMatchers("/pharmacy-stock", "/pharmacy-stock/**").hasAnyRole("PHARMACY", "ADMIN")
+                        .requestMatchers("/drugs", "/drugs/**").hasAnyRole("CLIENT", "PHARMACY", "ADMIN")
+                        .requestMatchers("/pharmacy-stock", "/pharmacy-stock/**").hasAnyRole("CLIENT", "PHARMACY", "ADMIN")
                         .requestMatchers("/reservations/**").hasAnyRole("CLIENT", "PHARMACY", "ADMIN")
+                        .requestMatchers("/clients/**").hasAnyRole("CLIENT")
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

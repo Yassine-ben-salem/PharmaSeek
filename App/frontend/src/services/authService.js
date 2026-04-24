@@ -56,7 +56,7 @@ const authService = {
    * Get current authenticated user
    */
   getCurrentUser: async () => {
-    const response = await apiClient.get('/auth/current');
+    const response = await apiClient.get('/auth/me');
     return response;
   },
 

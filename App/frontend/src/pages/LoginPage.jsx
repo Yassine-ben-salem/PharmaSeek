@@ -33,14 +33,13 @@ const LoginPage = () => {
             if (response.user) {
                 popup.valid('Login successful!');
                 
-                // Redirect based on user role
-                const userRoles = response.user.roles || [];
-                if (userRoles.includes('CLIENT')) {
-                    navigate('/client');
-                } else if (userRoles.includes('PHARMACY')) {
-                    navigate('/pharmacy');
+                const userRole = response.user.role;
+                if (userRole === 'CLIENT') {
+                    window.location.href = '/client';
+                } else if (userRole === 'PHARMACY') {
+                    window.location.href = '/pharmacy';
                 } else {
-                    navigate('/');
+                    window.location.href = '/';
                 }
             }
         } catch (error) {

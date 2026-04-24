@@ -1,13 +1,29 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const LivingBackground = ({ theme = 'pharmacy' }) => {
-    // Enhanced colors for better visibility against backgrounds
-    // Pharmacy (Dark Blue Background): Use brighter cyans and blues
-    // Client (Light Mint Background): Use darker emeralds and greens
     const colors = theme === 'pharmacy'
-        ? ['#38bdf8', '#0ea5e9', '#6366f1'] // Sky Blue, Sky 500, Indigo 500
-        : ['#34d399', '#10b981', '#059669']; // Emerald 400, Emerald 500, Emerald 600
+        ? ['#38bdf8', '#0ea5e9', '#6366f1']
+        : ['#34d399', '#10b981', '#059669'];
+
+    // Pre-generate random values once (not on every render)
+    const blobData = Array.from({ length: 6 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100 - 50,
+        y: Math.random() * 100 - 50,
+        scale: 0.8 + Math.random() * 0.4,
+        size: 200 + Math.random() * 200,
+        delay: Math.random() * 5,
+        duration: 15 + Math.random() * 10
+    }));
+
+    const particleData = Array.from({ length: 15 }, (_, i) => ({
+        id: i,
+        size: 2 + Math.random() * 2,
+        top: Math.random() * 100,
+        left: Math.random() * 100,
+        delay: Math.random() * 5,
+        duration: 10 + Math.random() * 10
+    }));
 
     return (
         <div className="living-background" style={{
@@ -20,72 +36,53 @@ const LivingBackground = ({ theme = 'pharmacy' }) => {
             zIndex: 0,
             pointerEvents: 'none',
         }}>
-            {/* Added White Particles for "Life" */}
-            {[...Array(15)].map((_, i) => (
-                <motion.div
-                    key={`p-${i}`}
+            {particleData.map(p => (
+                <div
+                    key={`p-${p.id}`}
                     style={{
                         position: 'absolute',
-                        width: Math.random() * 4 + 2 + 'px',
-                        height: Math.random() * 4 + 2 + 'px',
+                        width: p.size,
+                        height: p.size,
                         background: theme === 'pharmacy' ? 'rgba(255,255,255,0.3)' : 'rgba(16, 185, 129, 0.4)',
                         borderRadius: '50%',
-                        top: Math.random() * 100 + '%',
-                        left: Math.random() * 100 + '%',
-                    }}
-                    animate={{
-                        y: [0, -100],
-                        opacity: [0, 1, 0],
-                    }}
-                    transition={{
-                        duration: Math.random() * 10 + 10,
-                        repeat: Infinity,
-                        ease: "linear",
-                        delay: Math.random() * 5,
+                        top: `${p.top}%`,
+                        left: `${p.left}%`,
+                        animation: `float ${p.duration}s infinite linear`,
+                        animationDelay: `${p.delay}s`
                     }}
                 />
             ))}
 
-            {/* Ambient Blobs */}
-            {[...Array(6)].map((_, i) => (
-                <motion.div
-                    key={i}
+            {blobData.map(blob => (
+                <div
+                    key={blob.id}
                     style={{
                         position: 'absolute',
                         borderRadius: '50%',
-                        background: colors[i % colors.length],
-                        filter: 'blur(80px)', // Increased blur for softer look
-                        opacity: 0.5, // Increased opacity from 0.4
-                        width: Math.random() * 400 + 200, // 200-600px (Larger)
-                        height: Math.random() * 400 + 200,
-                    }}
-                    initial={{
-                        x: Math.random() * 100 - 50 + '%',
-                        y: Math.random() * 100 - 50 + '%',
-                        scale: 0.8,
-                    }}
-                    animate={{
-                        x: [
-                            (Math.random() - 0.5) * 100 + '%',
-                            (Math.random() - 0.5) * 100 + '%',
-                            (Math.random() - 0.5) * 100 + '%',
-                        ],
-                        y: [
-                            (Math.random() - 0.5) * 100 + '%',
-                            (Math.random() - 0.5) * 100 + '%',
-                            (Math.random() - 0.5) * 100 + '%',
-                        ],
-                        scale: [0.8, 1.4, 0.8],
-                        rotate: [0, 180, 360],
-                    }}
-                    transition={{
-                        duration: 25 + Math.random() * 15, // Slower, more majestic
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                        ease: "easeInOut",
+                        background: colors[blob.id % colors.length],
+                        filter: 'blur(80px)',
+                        opacity: 0.5,
+                        width: blob.size,
+                        height: blob.size,
+                        left: `${blob.x}%`,
+                        top: `${blob.y}%`,
+                        animation: `blobFloat ${blob.duration}s infinite ease-in-out`,
+                        animationDelay: `${blob.delay}s`
                     }}
                 />
             ))}
+
+            <style>{`
+                @keyframes float {
+                    0%, 100% { transform: translateY(0); opacity: 0; }
+                    50% { opacity: 1; }
+                    100% { transform: translateY(-100px); opacity: 0; }
+                }
+                @keyframes blobFloat {
+                    0%, 100% { transform: translate(0, 0) scale(1); }
+                    50% { transform: translate(30px, -30px) scale(1.1); }
+                }
+            `}</style>
         </div>
     );
 };

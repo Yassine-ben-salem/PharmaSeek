@@ -55,10 +55,20 @@ const reservationService = {
   },
 
   /**
+   * Get pharmacy's own reservations
+   */
+  getMyPharmacyReservations: async () => {
+    const response = await apiClient.get('/reservations/pharmacy/me');
+    return response;
+  },
+
+  /**
    * Create new reservation
    */
   createReservation: async (reservationData) => {
+    const user = JSON.parse(localStorage.getItem('user'));
     const response = await apiClient.post('/reservations', {
+      clientId: user?.id,
       pharmacyId: reservationData.pharmacyId,
       items: reservationData.items.map((item) => ({
         drugId: item.drugId,

@@ -408,10 +408,22 @@ td {
 .stock-status {
     margin-top: 1rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
-
+.stock-status p {
+    font-weight: 600;
+    color: var(--dash-text);
+    font-size: 1rem;
+    margin: 0;
+}
+.stock-status .action-btns {
+    margin-top: 0 !important;  /* override the inline style */
+    display: flex;
+    gap: 0.5rem;
+}
 /* Map Mockup */
 .map-placeholder {
     width: 100%;

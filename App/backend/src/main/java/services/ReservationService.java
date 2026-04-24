@@ -10,6 +10,7 @@ import entities.Pharmacy;
 import entities.Reservation;
 import entities.ReservationItem;
 import exceptions.ReservationNotFoundException;
+import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import mappers.ReservationMapper;
 import org.springframework.security.access.AccessDeniedException;
@@ -33,7 +34,9 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class ReservationService {
-    private static final Set<String> ALLOWED_STATUSES = Set.of("PENDING", "CONFIRMED", "CANCELLED", "EXPIRED");
+
+    private EntityManager entityManager;
+    private static final Set<String> ALLOWED_STATUSES = Set.of("PENDING", "CONFIRMED", "CANCELLED", "EXPIRED", "DONE");
 
     private final ReservationRepository reservationRepository;
     private final ReservationItemRepository reservationItemRepository;
@@ -128,9 +131,7 @@ public class ReservationService {
         }
 
         savedReservation.setTotalPrice(totalPrice);
-        if (minDelayMinutes != null) {
-            savedReservation.setExpirationTime(now.plusSeconds(minDelayMinutes.longValue() * 60));
-        }
+        savedReservation.setExpirationTime(null);
 
         Reservation updatedReservation = reservationRepository.save(savedReservation);
         return mapWithItems(updatedReservation);
@@ -163,31 +164,68 @@ public class ReservationService {
 
     @Transactional
     public Optional<ReservationDto> updateReservationStatus(Long id, ReservationStatusUpdateRequest request) {
-        return reservationRepository.findById(id)
-                .map(existingReservation -> {
-                    String currentStatus = normalizeStatus(existingReservation.getStatus());
-                    String targetStatus = normalizeStatus(request.getStatus());
+        Reservation existingReservation = reservationRepository.findById(id)
+                .orElse(null);
+        
+        if (existingReservation == null) {
+            return Optional.empty();
+        }
 
-                    validateStatus(targetStatus);
+        String currentStatus = normalizeStatus(existingReservation.getStatus());
+        String targetStatus = normalizeStatus(request.getStatus());
 
-                    if (!isTransitionAllowed(currentStatus, targetStatus)) {
-                        throw new IllegalStateException(
-                                "Invalid reservation status transition from " + currentStatus + " to " + targetStatus + "."
-                        );
-                    }
+        validateStatus(targetStatus);
 
-                    existingReservation.setStatus(targetStatus);
-                    Reservation updatedReservation = reservationRepository.save(existingReservation);
-                    return mapWithItems(updatedReservation);
-                });
+        if (!isTransitionAllowed(currentStatus, targetStatus)) {
+            throw new IllegalStateException(
+                    "Invalid reservation status transition from " + currentStatus + " to " + targetStatus + "."
+            );
+        }
+
+        existingReservation.setStatus(targetStatus);
+
+        if ("CONFIRMED".equals(targetStatus)) {
+            List<ReservationItem> items = reservationItemRepository.findByReservationId(id);
+            Integer delayMinutes = items.stream()
+                    .map(item -> item.getStock().getReservationDelayMinutes())
+                    .filter(delay -> delay != null)
+                    .min(Integer::compare)
+                    .orElse(24 * 60);
+            System.out.println("Setting expiration to " + delayMinutes + " minutes for reservation " + id);
+            existingReservation.setExpirationTime(Instant.now().plusSeconds(delayMinutes.longValue() * 60));
+        }
+
+        existingReservation.setUpdatedAt(Instant.now());
+        Reservation updatedReservation = reservationRepository.save(existingReservation);
+        return Optional.of(mapWithItems(updatedReservation));
     }
 
+    @Transactional
     public boolean deleteReservation(Long id) {
-        if (reservationRepository.existsById(id)) {
-            reservationRepository.deleteById(id);
-            return true;
+        if (!reservationRepository.existsById(id)) {
+            return false;
         }
-        return false;
+
+        Optional<Reservation> optReservation = reservationRepository.findById(id);
+        if (optReservation.isEmpty()) {
+            return false;
+        }
+
+        Reservation reservation = optReservation.get();
+        String currentStatus = normalizeStatus(reservation.getStatus());
+        String targetStatus = "CANCELLED";
+
+        if (!isTransitionAllowed(currentStatus, targetStatus)) {
+            throw new IllegalStateException("Cannot cancel reservation with status: " + currentStatus);
+        }
+
+        entityManager.joinTransaction();
+        entityManager.createNativeQuery("UPDATE reservation SET status = :status WHERE id = :id")
+                .setParameter("status", targetStatus)
+                .setParameter("id", id)
+                .executeUpdate();
+
+        return true;
     }
 
     public List<ReservationDto> getReservationsByClientId(Long clientId) {
@@ -221,6 +259,29 @@ public class ReservationService {
         return mapWithItems(reservation);
     }
 
+    public List<ReservationDto> getPharmacyReservationsForPharmacy(Authentication authentication) {
+        Long pharmacyId = resolveAuthenticatedUserId(authentication);
+        if (pharmacyRepository.findById(pharmacyId).isEmpty()) {
+            throw new IllegalArgumentException("Pharmacy not found");
+        }
+        List<Reservation> reservations = reservationRepository.findByPharmacyId(pharmacyId);
+        
+        Instant now = Instant.now();
+        for (Reservation reservation : reservations) {
+            if (("PENDING".equals(reservation.getStatus()) || "CONFIRMED".equals(reservation.getStatus()))
+                    && reservation.getExpirationTime() != null
+                    && reservation.getExpirationTime().isBefore(now)) {
+                reservation.setStatus("EXPIRED");
+                reservation.setUpdatedAt(now);
+                reservationRepository.save(reservation);
+            }
+        }
+        
+        return reservationRepository.findByPharmacyId(pharmacyId).stream()
+                .map(this::mapWithItems)
+                .collect(Collectors.toList());
+    }
+
     public List<ReservationDto>getReservationsByPharmacyId(Long pharmacyId) {
         if (!pharmacyRepository.existsById(pharmacyId)) {
             throw new IllegalArgumentException("Pharmacy with ID " + pharmacyId + " not found.");
@@ -239,6 +300,7 @@ public class ReservationService {
                     ReservationItemDto itemDto = new ReservationItemDto();
                     itemDto.setId(item.getId());
                     itemDto.setDrugId(item.getDrug().getId());
+                    itemDto.setDrugName(item.getDrug().getName());
                     itemDto.setQuantity(item.getQuantity());
                     itemDto.setPriceAtReservation(item.getPriceAtReservation());
                     return itemDto;
@@ -268,6 +330,11 @@ public class ReservationService {
             return "CONFIRMED".equals(targetStatus)
                     || "CANCELLED".equals(targetStatus)
                     || "EXPIRED".equals(targetStatus);
+        }
+
+        if ("CONFIRMED".equals(currentStatus)) {
+            return "DONE".equals(targetStatus)
+                    || "CANCELLED".equals(targetStatus);
         }
 
         return false;

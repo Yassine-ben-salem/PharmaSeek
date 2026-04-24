@@ -22,13 +22,31 @@ export const AuthProvider = ({ children }) => {
       try {
         if (authService.isAuthenticated()) {
           const currentUser = await authService.getCurrentUser();
-          setUser(currentUser);
+          const storedUser = localStorage.getItem('user');
+          const stored = storedUser ? JSON.parse(storedUser) : null;
+          const mergedUser = {
+            ...currentUser,
+            name: currentUser.pharmacyName || currentUser.name || stored?.name || null,
+            role: currentUser.role || stored?.role || null,
+            phone: currentUser.phone || stored?.phone || null,
+            latitude: currentUser.latitude || stored?.latitude || null,
+            longitude: currentUser.longitude || stored?.longitude || null,
+            operatingHours: currentUser.operatingHours || stored?.operatingHours || null,
+          };
+          setUser(mergedUser);
           setIsAuthenticated(true);
+          localStorage.setItem('user', JSON.stringify(mergedUser));
         }
       } catch (err) {
         console.error('Failed to initialize auth:', err);
-        authService.logout();
-        setIsAuthenticated(false);
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+          setIsAuthenticated(true);
+        } else {
+          authService.logout();
+          setIsAuthenticated(false);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -45,7 +63,20 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await authService.login(email, password);
-      setUser(response.user);
+      if (response.user) {
+        const storedUser = localStorage.getItem('user');
+        const stored = storedUser ? JSON.parse(storedUser) : null;
+        const mergedUser = {
+          ...response.user,
+          name: response.user.pharmacyName || response.user.name || stored?.name || null,
+          phone: response.user.phone || stored?.phone || null,
+          latitude: response.user.latitude || stored?.latitude || null,
+          longitude: response.user.longitude || stored?.longitude || null,
+          operatingHours: response.user.operatingHours || stored?.operatingHours || null,
+        };
+        setUser(mergedUser);
+        localStorage.setItem('user', JSON.stringify(mergedUser));
+      }
       setIsAuthenticated(true);
       return response;
     } catch (err) {
@@ -69,6 +100,11 @@ export const AuthProvider = ({ children }) => {
       } else {
         response = await authService.registerPharmacy(userData);
       }
+      if (response) {
+        setUser({ ...response, role: userType });
+        setIsAuthenticated(true);
+        localStorage.setItem('user', JSON.stringify({ ...response, role: userType }));
+      }
       return response;
     } catch (err) {
       setError(err.message || 'Signup failed');
@@ -88,6 +124,7 @@ export const AuthProvider = ({ children }) => {
       await authService.logout();
       setUser(null);
       setIsAuthenticated(false);
+      localStorage.removeItem('user');
     } catch (err) {
       setError(err.message || 'Logout failed');
     } finally {

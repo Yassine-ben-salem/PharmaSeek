@@ -11,6 +11,7 @@ import java.util.List;
 public class ReservationDto {
     private Long id;
     private Long clientId;
+    private String clientName;
     private Long pharmacyId;
     private String status;
     private BigDecimal totalPrice;
