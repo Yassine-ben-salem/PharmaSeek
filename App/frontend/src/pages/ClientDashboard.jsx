@@ -21,6 +21,7 @@ import {
     ChevronDown,
     ExternalLink
 } from 'lucide-react';
+import { IoMdRefresh } from "react-icons/io";
 import { useAuth } from '../context/AuthContext';
 import drugService from '../services/drugService';
 import reservationService from '../services/reservationService';
@@ -679,6 +680,9 @@ const handleCancelReservation = async (reservationId) => {
         <div className="section-container">
             <div className="section-header">
                 <h2>My Reservations</h2>
+                <button className="btn" onClick={() => { window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'valid', message: 'Refreshing...', duration: 1000 } })); loadData(); }} title="Refresh" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <IoMdRefresh size={18}/>
+                </button>
             </div>
             <div className="table-wrapper">
                 <table>

@@ -22,6 +22,7 @@ import {
     Moon,
     Navigation
 } from 'lucide-react';
+import { IoMdRefresh } from "react-icons/io";
 import { useAuth } from '../context/AuthContext';
 import reservationService from '../services/reservationService';
 import pharmacyStockService from '../services/pharmacyStockService';
@@ -87,6 +88,18 @@ const PharmacyDashboard = () => {
             console.error('Failed to load data:', error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const loadReservations = async () => {
+        try {
+            const reservations = await reservationService.getMyPharmacyReservations();
+            setReservationsData(reservations || []);
+            window.dispatchEvent(new CustomEvent('show-popup', {
+                detail: { type: 'valid', message: 'Reservations refreshed', duration: 2000 }
+            }));
+        } catch (error) {
+            console.error('Failed to load reservations:', error);
         }
     };
 
@@ -245,102 +258,102 @@ const PharmacyDashboard = () => {
             }, 0);
 
         return (
-        <>
-            <div className="stats-grid">
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(56, 189, 248, 0.1)', color: 'var(--pharmacy-accent)' }}>
-                        <Package size={24} />
+            <>
+                <div className="stats-grid">
+                    <div className="stat-card">
+                        <div className="stat-icon" style={{ background: 'rgba(56, 189, 248, 0.1)', color: 'var(--pharmacy-accent)' }}>
+                            <Package size={24} />
+                        </div>
+                        <div className="stat-info">
+                            <div className="stat-value">{totalProducts}</div>
+                            <div className="stat-label">Total Products</div>
+                        </div>
                     </div>
-                    <div className="stat-info">
-                        <div className="stat-value">{totalProducts}</div>
-                        <div className="stat-label">Total Products</div>
+                    <div className="stat-card">
+                        <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171' }}>
+                            <AlertTriangle size={24} />
+                        </div>
+                        <div className="stat-info">
+                            <div className="stat-value">{lowStockItems}</div>
+                            <div className="stat-label">Low Stock items</div>
+                        </div>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}>
+                            <CalendarCheck size={24} />
+                        </div>
+                        <div className="stat-info">
+                            <div className="stat-value">{reservationsToday}</div>
+                            <div className="stat-label">Reservations Today</div>
+                        </div>
+                    </div>
+                    <div className="stat-card">
+                        <div className="stat-icon" style={{ background: 'rgba(139, 92, 246, 0.2)', color: '#a78bfa' }}>
+                            <TrendingUp size={24} />
+                        </div>
+                        <div className="stat-info">
+                            <div className="stat-value">€{totalGained.toFixed(2)}</div>
+                            <div className="stat-label">Total Gained Today</div>
+                        </div>
                     </div>
                 </div>
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171' }}>
-                        <AlertTriangle size={24} />
-                    </div>
-                    <div className="stat-info">
-                        <div className="stat-value">{lowStockItems}</div>
-                        <div className="stat-label">Low Stock items</div>
-                    </div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}>
-                        <CalendarCheck size={24} />
-                    </div>
-                    <div className="stat-info">
-                        <div className="stat-value">{reservationsToday}</div>
-                        <div className="stat-label">Reservations Today</div>
-                    </div>
-                </div>
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(139, 92, 246, 0.2)', color: '#a78bfa' }}>
-                        <TrendingUp size={24} />
-                    </div>
-                    <div className="stat-info">
-                        <div className="stat-value">€{totalGained.toFixed(2)}</div>
-                        <div className="stat-label">Total Gained Today</div>
-                    </div>
-                </div>
-            </div>
 
-            <div className="section-container">
-                <div className="section-header">
-                    <h2>Recent Reservations</h2>
-                    <button className="btn btn-primary" onClick={() => setActiveTab('reservations')}>View All</button>
-                </div>
-                <div className="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Patient</th>
-                                <th>Medicine</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {reservationsData.slice(0, 3).map(res => (
-                                <tr key={res.id}>
-                                    <td><strong>{res.id}</strong></td>
-                                    <td>Client #{res.clientId}</td>
-                                    <td>{res.items && res.items.length > 0 ? `${res.items.length} item(s)` : 'N/A'}</td>
-                                    <td>
-                                        <span className={`badge ${res.status === 'PENDING' ? 'badge-warning' :
-                                            res.status === 'CONFIRMED' ? 'badge-info' :
-                                            res.status === 'DONE' ? 'badge-success' : 'badge-info'
-                                            }`}>
-                                            {res.status}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {res.status === 'PENDING' && (
-                                            <button 
-                                                className="btn-icon"
-                                                onClick={() => handleUpdateReservationStatus(res.id, 'CONFIRMED')}
-                                                title="Confirm Reservation"
-                                            >
-                                                <CheckCircle2 size={18} />
-                                            </button>
-                                        )}
-                                        {res.status === 'CONFIRMED' && (
-                                            <button 
-                                                className="btn-icon"
-                                                onClick={() => handleUpdateReservationStatus(res.id, 'DONE')}
-                                                title="Mark as Done"
-                                            >
-                                                <CheckCircle2 size={18} />
-                                            </button>
-                                        )}
-                                    </td>
+                <div className="section-container">
+                    <div className="section-header">
+                        <h2>Recent Reservations</h2>
+                        <button className="btn btn-primary" onClick={() => setActiveTab('reservations')}>View All</button>
+                    </div>
+                    <div className="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Patient</th>
+                                    <th>Medicine</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {reservationsData.slice(0, 3).map(res => (
+                                    <tr key={res.id}>
+                                        <td><strong>{res.id}</strong></td>
+                                        <td>Client #{res.clientId}</td>
+                                        <td>{res.items && res.items.length > 0 ? `${res.items.length} item(s)` : 'N/A'}</td>
+                                        <td>
+                                            <span className={`badge ${res.status === 'PENDING' ? 'badge-warning' :
+                                                res.status === 'CONFIRMED' ? 'badge-info' :
+                                                    res.status === 'DONE' ? 'badge-success' : 'badge-info'
+                                                }`}>
+                                                {res.status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {res.status === 'PENDING' && (
+                                                <button
+                                                    className="btn-icon"
+                                                    onClick={() => handleUpdateReservationStatus(res.id, 'CONFIRMED')}
+                                                    title="Confirm Reservation"
+                                                >
+                                                    <CheckCircle2 size={18} />
+                                                </button>
+                                            )}
+                                            {res.status === 'CONFIRMED' && (
+                                                <button
+                                                    className="btn-icon"
+                                                    onClick={() => handleUpdateReservationStatus(res.id, 'DONE')}
+                                                    title="Mark as Done"
+                                                >
+                                                    <CheckCircle2 size={18} />
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-</div>
             </>
         );
     };
@@ -484,9 +497,10 @@ const PharmacyDashboard = () => {
             <div className="section-container">
                 <div className="section-header">
                     <h2>Manage Reservations</h2>
-                    <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
-                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)' }} />
-                        <input type="text" placeholder="Search Patient or Order ID..." style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', border: '1px solid var(--dash-border)', background: 'var(--dash-card)', color: 'var(--dash-text)' }} />
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <button className="btn" onClick={() => { window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'valid', message: 'Refreshing...', duration: 1000 } })); loadData(); }} title="Refresh" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <IoMdRefresh size={18} />
+                        </button>
                     </div>
                 </div>
                 <div className="table-wrapper">
@@ -677,13 +691,13 @@ const PharmacyDashboard = () => {
                     <div className="header-title">
                         <h1>
                             {activeTab === 'overview' ? `Welcome back, ${user?.name || 'Pharmacy'}!` :
-                                activeTab === 'inventory' ? 'Inventory Management' : 
-                                activeTab === 'reservations' ? 'Reservations Overview' : 'Pharmacy Settings'}
+                                activeTab === 'inventory' ? 'Inventory Management' :
+                                    activeTab === 'reservations' ? 'Reservations Overview' : 'Pharmacy Settings'}
                         </h1>
                         <p>
                             {activeTab === 'overview' ? 'Here is what is happening today.' :
-                                activeTab === 'inventory' ? 'Manage and track your medical stock.' : 
-                                activeTab === 'reservations' ? 'Review and process patient reservations.' : 'Configure your pharmacy details and location parameters.'}
+                                activeTab === 'inventory' ? 'Manage and track your medical stock.' :
+                                    activeTab === 'reservations' ? 'Review and process patient reservations.' : 'Configure your pharmacy details and location parameters.'}
                         </p>
                     </div>
                     <div className="header-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
