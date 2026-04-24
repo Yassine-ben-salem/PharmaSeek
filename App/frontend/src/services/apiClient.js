@@ -50,16 +50,19 @@ class ApiClient {
    */
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
-    const headers = this.getAuthHeaders();
+    
+    const isFormData = options.body instanceof FormData;
+    
+    const headers = {
+      ...(isFormData ? {} : this.getAuthHeaders()),
+      ...options.headers,
+    };
 
     try {
       const response = await fetch(url, {
         ...options,
-        headers: {
-          ...headers,
-          ...options.headers,
-        },
-        credentials: 'include', // Include cookies for refresh token
+        headers,
+        credentials: 'include',
       });
 
       // Handle 401 - Unauthorized (token expired)
@@ -103,14 +106,18 @@ class ApiClient {
     });
   }
 
-  /**
-   * POST request
-   */
+/**
+    * POST request
+    */
   post(endpoint, body, options = {}) {
+    const isFormData = body instanceof FormData;
     return this.request(endpoint, {
       ...options,
       method: 'POST',
-      body: JSON.stringify(body),
+      body: isFormData ? body : JSON.stringify(body),
+      headers: isFormData 
+        ? { ...options.headers }  // Let browser set Content-Type for FormData
+        : { ...this.getAuthHeaders(), ...options.headers },
     });
   }
 

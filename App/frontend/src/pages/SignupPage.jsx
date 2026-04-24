@@ -5,7 +5,7 @@ import { Mail, Lock, ArrowRight, User, Stethoscope, Building, FileBadge, Phone, 
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import usePopUp from '../components/usePopUp';
+import useGlobalPopup from '../components/PopupContext';
 import './Auth.css';
 
 const SignupPage = () => {
@@ -13,7 +13,7 @@ const SignupPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { signup } = useAuth();
-    const {popup} = usePopUp();
+    const {popup} = useGlobalPopup();
 
     // Common fields
     const [email, setEmail] = useState('');

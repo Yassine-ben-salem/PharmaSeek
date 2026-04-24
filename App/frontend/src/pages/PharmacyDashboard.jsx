@@ -26,13 +26,13 @@ import { useAuth } from '../context/AuthContext';
 import reservationService from '../services/reservationService';
 import pharmacyStockService from '../services/pharmacyStockService';
 import pharmacyService from '../services/pharmacyService';
-import usePopUp from '../components/usePopUp';
+import useGlobalPopup from '../components/PopupContext';
 import './PharmacyDashboard.css';
 
 const PharmacyDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const { user, logout } = useAuth();
-    const { popup } = usePopUp();
+    const { popup } = useGlobalPopup();
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);

@@ -1,11 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
+import { CheckCircle, AlertTriangle, XCircle, Info, X } from 'lucide-react';
 import './PopUp.css';
 
 /* ─────────────────────────────────────────────
    TYPE CONFIG
-───────────────────────────────────────────── */
+──────────────────────────────────────────── */
 const CONFIG = {
   valid: {
     icon: CheckCircle,
@@ -21,6 +21,11 @@ const CONFIG = {
     icon: XCircle,
     label: 'Error',
     className: 'popup--error',
+  },
+  info: {
+    icon: Info,
+    label: 'Info',
+    className: 'popup--info',
   },
 };
 
@@ -106,15 +111,32 @@ const PopUp = ({ id, type = 'valid', message, duration = 4000, onRemove }) => {
 
 /* ─────────────────────────────────────────────
    POPUP CONTAINER  (renders the stack)
-───────────────────────────────────────────── */
-export const PopUpContainer = ({ popups, onRemove }) => (
-  <div className="popup-container" aria-label="Notifications">
-    <AnimatePresence mode="popLayout">
-      {popups.map((t) => (
-        <PopUp key={t.id} {...t} onRemove={onRemove} />
-      ))}
-    </AnimatePresence>
-  </div>
-);
+──────────────────────────────────────────── */
+export const PopUpContainer = () => {
+  const [popups, setPopups] = useState([]);
+
+  useEffect(() => {
+    const showPopup = (e) => {
+      const { type, message, duration } = e.detail;
+      const id = `popup-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      setPopups((prev) => [...prev, { id, type, message, duration }]);
+      setTimeout(() => {
+        setPopups((prev) => prev.filter((t) => t.id !== id));
+      }, duration || 4000);
+    };
+    window.addEventListener('show-popup', showPopup);
+    return () => window.removeEventListener('show-popup', showPopup);
+  }, []);
+
+  return (
+    <div className="popup-container" aria-label="Notifications">
+      <AnimatePresence mode="popLayout">
+        {popups.map((t) => (
+          <PopUp key={t.id} {...t} onRemove={() => setPopups((prev) => prev.filter((p) => p.id !== t.id))} />
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 export default PopUp;

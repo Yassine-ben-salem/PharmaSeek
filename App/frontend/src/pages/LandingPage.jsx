@@ -8,7 +8,7 @@ import Navbar from '../components/Navbar';
 import AboutSection from '../components/AboutSection';
 import ContactSection from '../components/ContactSection';
 import Footer from '../components/Footer';
-import usePopUp from '../components/usePopUp';
+import useGlobalPopup from '../components/PopupContext';
 import './LandingPage.css';
 
 const PARTICLE_COUNT = 20;
@@ -22,7 +22,7 @@ const PARTICLE_POSITIONS = Array.from({ length: PARTICLE_COUNT }, () => ({
 const LandingPage = () => {
     const heroRef = useRef(null);
     const { user, isAuthenticated } = useAuth();
-    const { popup } = usePopUp();
+    const { popup } = useGlobalPopup();
     const userRole = user?.role;
 
     return (

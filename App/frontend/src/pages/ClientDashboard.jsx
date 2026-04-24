@@ -26,6 +26,7 @@ import drugService from '../services/drugService';
 import reservationService from '../services/reservationService';
 import pharmacyStockService from '../services/pharmacyStockService';
 import clientService from '../services/clientService';
+import aiService from '../services/aiService';
 import usePopUp from '../components/usePopUp';
 import './ClientDashboard.css';
 
@@ -261,10 +262,39 @@ const ClientDashboard = () => {
         setIsCameraModalOpen(false);
     };
     
-    const handleFileChange = (e) => {
+    const handleFileChange = async (e) => {
         if(e.target.files && e.target.files.length > 0) {
-            alert(`Scanning ${e.target.files[0].name}... Medicine detected: Amoxicillin`);
-            setSearchQuery("Amoxicillin");
+            setIsLoading(true);
+            try {
+                const result = await aiService.detectDrug(e.target.files[0]);
+                if (result.success && result.matched) {
+                    setSearchQuery(result.drugName);
+                    window.dispatchEvent(new CustomEvent('show-popup', { 
+                        detail: { type: 'valid', message: `Detected: ${result.drugName}`, duration: 4000 } 
+                    }));
+                } else if (result.success && !result.matched) {
+                    const suggestions = result.suggestions || [];
+                    let msg = 'No matching medicine found';
+                    if (suggestions.length > 0) {
+                        msg += `. Try: ${suggestions.slice(0, 3).join(', ')}`;
+                        setSearchQuery(suggestions[0]);
+                    }
+                    window.dispatchEvent(new CustomEvent('show-popup', { 
+                        detail: { type: 'warning', message: msg, duration: 6000 } 
+                    }));
+                } else {
+                    window.dispatchEvent(new CustomEvent('show-popup', { 
+                        detail: { type: 'error', message: 'Detection failed. Try again.', duration: 4000 } 
+                    }));
+                }
+            } catch (error) {
+                console.error('Detection error:', error);
+                window.dispatchEvent(new CustomEvent('show-popup', { 
+                    detail: { type: 'error', message: 'Failed to detect medicine', duration: 4000 } 
+                }));
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
