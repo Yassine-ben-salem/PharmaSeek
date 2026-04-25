@@ -57,6 +57,8 @@ const ClientDashboard = () => {
         phone: user?.phone || ''
     });
     const [isSaving, setIsSaving] = useState(false);
+    const [userLocation, setUserLocation] = useState(null);
+    const [locationError, setLocationError] = useState(null);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [nearbyCount, setNearbyCount] = useState(0);
     const [isNearbyHovered, setIsNearbyHovered] = useState(false);
@@ -101,6 +103,29 @@ const ClientDashboard = () => {
         return R * c;
     };
 
+    const isPharmacyOpen = (operatingHours) => {
+        if (!operatingHours) return false;
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const today = days[dayOfWeek];
+        
+        const dayMatch = operatingHours.match(new RegExp(today + '\\s*[-–]\\s*(\\d{1,2}):(\\d{2})\\s*[-–]\\s*(\\d{1,2}):(\\d{2})', 'i'));
+        if (dayMatch) {
+            const openHour = parseInt(dayMatch[1]);
+            const openMin = parseInt(dayMatch[2]);
+            const closeHour = parseInt(dayMatch[3]);
+            const closeMin = parseInt(dayMatch[4]);
+            const currentHour = now.getHours();
+            const currentMin = now.getMinutes();
+            const currentTime = currentHour * 60 + currentMin;
+            const openTime = openHour * 60 + openMin;
+            const closeTime = closeHour * 60 + closeMin;
+            return currentTime >= openTime && currentTime <= closeTime;
+        }
+        return false;
+    };
+
     const getDrugNames = (items) => {
         if (!items || items.length === 0) return 'N/A';
         return items.map(item => item.drugName).join(', ');
@@ -131,6 +156,25 @@ const ClientDashboard = () => {
             calculateNearbyPharmacies(pharmacies);
         }
     }, [pharmacies]);
+
+    useEffect(() => {
+        if (!navigator.geolocation) {
+            setLocationError('Geolocation is not supported');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setUserLocation({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                });
+                setLocationError(null);
+            },
+            (error) => {
+                setLocationError(error.message);
+            }
+        );
+    }, []);
 
     useEffect(() => {
         const fetchSearchResults = async () => {
@@ -496,7 +540,7 @@ const handleCancelReservation = async (reservationId) => {
         <>
             <div className="section-container">
                 <div className="section-header">
-                    <h2>Search Medicines</h2>
+                    <h2 style={{ textAlign: 'left' }}>Search Medicines</h2>
                 </div>
                 <div className="search-bar" style={{ position: 'relative', width: '100%', maxWidth: '500px', display: 'flex', gap: '0.8rem' }}>
                     <div style={{ position: 'relative', flex: 1 }}>
@@ -509,174 +553,144 @@ const handleCancelReservation = async (reservationId) => {
                             style={{ width: '100%', padding: '0.8rem 1rem 0.8rem 2.5rem', borderRadius: '15px', border: '1px solid var(--dash-border)', background: 'var(--dash-card)', color: 'var(--dash-text)' }}
                         />
                     </div>
-                    <div style={{ position: 'relative' }}>
-                        <button 
-                            className="btn-icon" 
-                            style={{ height: '100%', width: '48px', borderRadius: '15px', background: 'var(--dash-card)' }}
-                            onClick={() => setIsScanMenuOpen(!isScanMenuOpen)}
-                            title="Scan Prescription or Medicine"
-                        >
-                            <Scan size={20} />
-                        </button>
-                        
-                        {isScanMenuOpen && (
-                            <>
-                                <div 
-                                    onClick={() => setIsScanMenuOpen(false)}
-                                    style={{
-                                        position: 'fixed',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        zIndex: 9998
-                                    }}
-                                />
-                                <div className="scan-dropdown" style={{
+                    <button 
+                        className="btn-icon" 
+                        style={{ height: '100%', width: '48px', borderRadius: '15px', background: 'var(--dash-card)', flexShrink: 0 , padding:"0.8rem"}}
+                        onClick={() => setIsScanMenuOpen(!isScanMenuOpen)}
+                        title="Scan Prescription or Medicine"
+                    >
+                        <Scan size={20} />
+                    </button>
+                    
+                    {isScanMenuOpen && (
+                        <>
+                            <div 
+                                onClick={() => setIsScanMenuOpen(false)}
+                                style={{
                                     position: 'fixed',
-                                    top: '40%',
-                                    right: '2rem',
-                                    background: 'var(--dash-client-sidebar)',
-                                    border: '1px solid var(--dash-border)',
-                                    borderRadius: '12px',
-                                    padding: '0.75rem',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '0.5rem',
-                                    width: '220px',
-                                    zIndex: 9999,
-                                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
-                                }}>
-                                <button className="nav-item" onClick={() => handleScanOption('camera')} style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
-                                    <Camera size={18} /> Take Photo
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    zIndex: 9998
+                                }}
+                            />
+                            <div className="scan-dropdown" style={{
+                                position: 'fixed',
+                                top: '200px',
+                                left: 'calc(50% - 280px)',
+                                background: 'var(--dash-client-sidebar)',
+                                border: '1px solid var(--dash-border)',
+                                borderRadius: '12px',
+                                padding: '0.75rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.5rem',
+                                width: '220px',
+                                zIndex: 9999,
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                            }}>
+                            <button className="nav-item" onClick={() => handleScanOption('camera')} style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
+                                <Camera size={18} /> Take Photo
+                            </button>
+                            <button className="nav-item" onClick={() => handleScanOption('gallery')} style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
+                                    <ImageIcon size={18} /> Upload from Gallery
                                 </button>
-                                <button className="nav-item" onClick={() => handleScanOption('gallery')} style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
-                                        <ImageIcon size={18} /> Upload from Gallery
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                        <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
-                    </div>
+                            </div>
+                        </>
+                    )}
+                    <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
                 </div>
             </div>
 
-            {searchQuery ? (
+{searchQuery ? (
                 <div className="search-results">
                     {!selectedDrug ? (
-                        <>
-                            {/*<h3>Medicines matching "{searchQuery}":</h3>*/}
-                            <div className="search-results-grid">
-                                {drugs.length > 0 ? (
-                                    drugs.map(drug => (
-                                        <div key={drug.id} className="pharmacy-card" onClick={() => handleDrugClick(drug)} style={{ cursor: 'pointer' }}>
-                                            <div className="pharmacy-info">
-                                                <h3>{drug.name}</h3>
-                                                <p>{drug.description || 'No description available'}</p>
-                                                {drug.requiresPrescription && (
-                                                    <span className="badge badge-warning">Requires Prescription</span>
-                                                )}
-                                            </div>
+                        <div className="search-results-grid">
+                            {drugs.length > 0 ? (
+                                drugs.map(drug => (
+                                    <div key={drug.id} className="pharmacy-card" onClick={() => handleDrugClick(drug)} style={{ cursor: 'pointer' }}>
+                                        <div className="pharmacy-info">
+                                            <h3>{drug.name}</h3>
+                                            <p>{drug.description || 'No description available'}</p>
+                                            {drug.requiresPrescription && (
+                                                <span className="badge badge-warning">Requires Prescription</span>
+                                            )}
                                         </div>
-                                    ))
-                                ) : (
-                                    <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>No medicines found matching "{searchQuery}"</p>
-                                )}
-                            </div>
-                        </>
+                                    </div>
+                                ))
+                            ) : (
+                                <p style={{ color: 'var(--text-secondary)', textAlign: 'center', gridColumn: '1/-1' }}>No medicines found matching "{searchQuery}"</p>
+                            )}
+                        </div>
                     ) : (
-                        <>
-                            <div style={{ margin: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <button 
-                                    className="btn btn-secondary"
-                                    onClick={() => setSelectedDrug(null)}
-                                    style={{ padding: '0.5rem 1rem' }}
-                                >
-                                    ← Back
+                        <div className="search-results-grid">
+                            <div style={{ margin: '1rem 0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <button className="btn btn-secondary" onClick={() => setSelectedDrug(null)} style={{ padding: '0.5rem 1rem' , color: 'var(--text-secondary)'}}>
+                                    Back
                                 </button>
                                 <h3>Pharmacies with "{selectedDrug.name}" in stock:</h3>
                             </div>
-<div className="search-results-grid">
-                                {pharmacies.length > 0 ? (
-                                    pharmacies.map(pharma => (
+                            {pharmacies.length > 0 ? (
+                                pharmacies.map(pharma => {
+                                    const distance = userLocation && pharma.latitude && pharma.longitude 
+                                        ? getDistance(userLocation.latitude, userLocation.longitude, pharma.latitude, pharma.longitude)
+                                        : null;
+                                    const isOpen = pharma.operatingHours ? isPharmacyOpen(pharma.operatingHours) : null;
+                                    return (
                                         <div key={pharma.id} className="pharmacy-card" style={{ position: 'relative' }}>
-                                            {/*<button 
-                                                onClick={() => setPharmacies(pharmacies.filter(p => p.id !== pharma.id))}
-                                                style={{ 
-                                                    position: 'absolute', 
-                                                    top: '8px', 
-                                                    right: '8px',
-                                                    background: 'none',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    color: 'var(--text-secondary)',
-                                                    padding: '4px'
-                                                }}
-                                            >
-                                                <X size={18} />
-                                            </button>*/}
-                                            <div 
-                                                className="pharmacy-info"
-                                                onClick={() => setExpandedPharmacy(expandedPharmacy === pharma.id ? null : pharma.id)}
-                                                style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '2rem' }}
-                                            >
+                                            <div className="pharmacy-info" onClick={() => setExpandedPharmacy(expandedPharmacy === pharma.id ? null : pharma.id)} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '2rem' }}>
                                                 <div>
                                                     <h3>{pharma.pharmacyName || 'Pharmacy'}</h3>
-                                                    <p><MapPin size={14} /> {pharma.pharmacyAddress || 'Address not available'}</p>
                                                 </div>
-                                                <ChevronDown 
-                                                    size={20} 
-                                                    style={{ 
-                                                        transform: expandedPharmacy === pharma.id ? 'rotate(180deg)' : 'rotate(0deg)',
-                                                        transition: 'transform 0.2s',
-                                                        flexShrink: 0
-                                                    }} 
-                                                />
+                                                <ChevronDown size={20} style={{ transform: expandedPharmacy === pharma.id ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }} />
                                             </div>
-                                            {expandedPharmacy === pharma.id && pharma.latitude && pharma.longitude && (
-                                                <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
-                                                    <a 
-                                                        href={`https://www.google.com/maps?q=${pharma.latitude},${pharma.longitude}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)', textDecoration: 'none' }}
-                                                    >
-                                                        <ExternalLink size={16} />
-                                                        Open in Google Maps
-                                                    </a>
-                                                </div>
-                                            )}
-                                            
+                                            <div style={{ display: 'flex', gap: '1rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                                                {distance !== null && (
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: distance <= 1 ? 'var(--success, #16a34a)' : 'var(--text-secondary)' }}>
+                                                        <Navigation size={14} />
+                                                        {distance < 1 ? '<1 km' : `${distance.toFixed(1)} km`}
+                                                    </span>
+                                                )}
+                                                {pharma.operatingHours && (
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: isOpen ? 'var(--success, #16a34a)' : 'var(--danger, #dc2626)' }}>
+                                                        <Clock size={14} />
+                                                        {isOpen ? 'Open now' : 'Closed'}
+                                                        <span style={{ color: 'var(--text-secondary)', fontWeight: 'normal' }}>({pharma.operatingHours})</span>
+                                                    </span>
+                                                )}
+                                            </div>
                                             <div className="stock-status">
                                                 {pharma.quantity > 0 ? (
                                                     <span className="badge badge-success">In Stock</span>
                                                 ) : (
                                                     <span className="badge badge-danger">Out of Stock</span>
                                                 )}
-                                                <p>Price: ${pharma.price}</p>
-                                                <div className="action-btns" style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-                                                    {pharma.quantity > 0 && (
-                                                        <button
-                                                            className="btn btn-primary"
-                                                            style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', flex: 1 }}
-                                                            onClick={(e) => {
-                                                                setSelectedPharmacy(pharma);
-                                                                setCurrentMedicine(selectedDrug.name);
-                                                                setIsReserveModalOpen(true);
-                                                            }}
-                                                        >
-                                                            Reserve Now
-                                                        </button>
-                                                    )}
-                                                </div>
+                                                <p>Price: {pharma.price} TDN</p>
+                                                {pharma.quantity > 0 && (
+                                                    <button className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }} onClick={() => { setSelectedPharmacy(pharma); setCurrentMedicine(selectedDrug.name); setIsReserveModalOpen(true); }}>
+                                                        Reserve Now
+                                                    </button>
+                                                )}
                                             </div>
+                                            {expandedPharmacy === pharma.id && pharma.latitude && pharma.longitude && (
+                                                <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+                                                    <button
+                                                        onClick={() => window.open(`https://www.google.com/maps?q=${pharma.latitude},${pharma.longitude}`, '_blank')}
+                                                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                                                    >
+                                                        <ExternalLink size={16} />
+                                                        Show in Maps
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
-                                    ))
-                                ) : (
-                                    <p style={{ color: 'var(--text-secondary)', margin: '1rem', justifyItems: 'center' }}>No pharmacies found with this medicine in stock.</p>
-                                )}
-                            </div>
-                        </>
+                                    );
+                                })
+                            ) : (
+                                <p style={{ color: 'var(--text-secondary)', textAlign: 'center', gridColumn: '1/-1' }}>No pharmacies found with this medicine in stock.</p>
+                            )}
+                        </div>
                     )}
                 </div>
             ) : (
