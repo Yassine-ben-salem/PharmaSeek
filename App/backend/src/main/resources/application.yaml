@@ -16,6 +16,11 @@ spring:
       write-dates-as-timestamps: false
   flyway:
     baseline-on-migrate: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
   jwt:
     secret: ${JWT_SECRET:PharmaSeekAppSecretKey2026VeryLongKey}
     accessTokenValidity: 7200000

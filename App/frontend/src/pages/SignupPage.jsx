@@ -5,7 +5,7 @@ import { Mail, Lock, ArrowRight, User, Stethoscope, Building, FileBadge, Phone, 
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import usePopUp from '../components/usePopUp';
+import useGlobalPopup from '../components/PopupContext';
 import './Auth.css';
 
 const SignupPage = () => {
@@ -13,7 +13,7 @@ const SignupPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { signup } = useAuth();
-    const {popup} = usePopUp();
+    const {popup} = useGlobalPopup();
 
     // Common fields
     const [email, setEmail] = useState('');
@@ -138,13 +138,29 @@ const SignupPage = () => {
             }
 
             await signup(userData, role);
-            popup.valid('Account created successfully!');
             
-            // Redirect based on role
-            navigate(role === 'client' ? '/client/dashboard' : '/pharmacy/dashboard');
+            if (role === 'pharmacy') {
+                window.dispatchEvent(new CustomEvent('show-popup', { 
+                    detail: { 
+                        type: 'valid', 
+                        message: 'Your request submitted! You will receive an email within 24 hours.', 
+                        duration: 5000 
+                    } 
+                }));
+                navigate('/login');
+            } else {
+                window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'valid', message: 'Account created successfully!', duration: 4000 } }));
+                setTimeout(() => navigate('/login'), 1500);
+            }
         } catch (error) {
             console.error('Signup error:', error);
-            popup.error(error.message || 'Signup failed. Please try again.');
+            window.dispatchEvent(new CustomEvent('show-popup', { 
+                detail: { 
+                    type: 'error', 
+                    message: error.message || 'Signup failed. Please try again.', 
+                    duration: 4000 
+                } 
+            }));
         } finally {
             setIsLoading(false);
         }
@@ -274,7 +290,7 @@ const SignupPage = () => {
                                     className="btn-submit"
                                     onClick={getCurrentLocation}
                                     disabled={isGettingLocation}
-                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: latitude ? 'var(--success, #4caf50)' : 'var(--primary)' }}
+                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: latitude ? 'var(--success, #4caf50)' : 'var(--primary)', color: 'var(--text-primary)' }}
                                 >
                                     <Navigation size={18} />
                                     {isGettingLocation ? 'Getting Location...' : latitude ? `Location Set: ${latitude}, ${longitude}` : 'Get Current Location (Required)'}

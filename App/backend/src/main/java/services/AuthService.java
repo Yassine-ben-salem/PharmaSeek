@@ -302,15 +302,17 @@ public class AuthService {
         Long userId = resolveAuthenticatedUserId(authentication);
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-        if(user.getRole() == Roles.CLIENT) {
-            return clientRepository.findById(userId)
-                    .map(clientMapper::toClientDto)
-                    .orElseThrow(() -> new RuntimeException("Client not found"));
-        }
-        else{
+        
+        if (user.getRole() == Roles.PHARMACY) {
             return pharmacyRepository.findById(userId)
                     .map(pharmacyMapper::toPharmacyDto)
                     .orElseThrow(() -> new RuntimeException("Pharmacy not found"));
+        } else if (user.getRole() == Roles.CLIENT) {
+            return clientRepository.findById(userId)
+                    .map(clientMapper::toClientDto)
+                    .orElseThrow(() -> new RuntimeException("Client not found"));
+        } else {
+            return userMapper.toUserDto(user);
         }
     }
 }

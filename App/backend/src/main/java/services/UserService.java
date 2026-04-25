@@ -13,8 +13,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import repositories.ClientRepository;
 import repositories.RoleRepository;
 import repositories.PharmacyRepository;
+import repositories.ReservationRepository;
 import repositories.UserRepository;
 
 import java.time.Instant;
@@ -27,10 +29,13 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final ClientRepository clientRepository;
     private final PharmacyRepository pharmacyRepository;
+    private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PharmacyMapper pharmacyMapper;
+    private final ReservationRepository reservationRepository;
+    private final EmailService emailService;
 
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream()
@@ -80,6 +85,18 @@ public class UserService {
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
+        Roles currentRole = user.getRole();
+
+        if (requestedRole == Roles.ADMIN) {
+            if (currentRole == Roles.CLIENT) {
+                // Delete client's reservations first to avoid FK constraint
+                reservationRepository.deleteByClientId(userId);
+                clientRepository.deleteById(userId);
+            } else if (currentRole == Roles.PHARMACY) {
+                pharmacyRepository.deleteById(userId);
+            }
+        }
+
         user.setRoles(new HashSet<>(Set.of(role)));
         var savedUser = userRepository.save(user);
         return userMapper.toUserDto(savedUser);
@@ -101,6 +118,9 @@ public class UserService {
         pharmacy.setUpdatedAt(Instant.now().plus(1, ChronoUnit.HOURS));
 
         var savedPharmacy = pharmacyRepository.save(pharmacy);
+
+        emailService.sendPharmacyApprovalEmail(pharmacy.getEmail(), approved);
+
         return pharmacyMapper.toPharmacyDto(savedPharmacy);
     }
 

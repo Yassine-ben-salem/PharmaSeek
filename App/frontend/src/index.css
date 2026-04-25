@@ -13,17 +13,23 @@
   --border-color: rgba(0, 0, 0, 0.1);
   --btn-text: #ffffff;
 
+  /* Status colors */
+  --danger: #dc2626;
+  --success: #16a34a;
+  --purple: #7c3aed;
+  --warning: #ca8a04;
+
   /* Dashboard Light Theme */
-  --dash-pharma-bg: #f8fafc;
-  --dash-pharma-sidebar: rgba(255, 255, 255, 0.9);
-  --dash-client-bg: #f0fdf4;
-  --dash-client-sidebar: rgba(255, 255, 255, 0.9);
+  --dash-pharma-bg: #f1f5f9;
+  --dash-pharma-sidebar: #ffffff;
+  --dash-client-bg: #f1f5f9;
+  --dash-client-sidebar: #ffffff;
   
   --dash-text: #0f172a;
   --dash-text-muted: #64748b;
   --dash-border: rgba(0, 0, 0, 0.1);
-  --dash-card: rgba(255, 255, 255, 0.8);
-  --dash-card-hover: rgba(255, 255, 255, 1);
+  --dash-card: #ffffff;
+  --dash-card-hover: #f8fafc;
 
   /* Original Palette Variables for Hero (Preserved for the split design) */
   --pharmacy-blue: #0A192F;
@@ -57,17 +63,27 @@
   --border-color: rgba(255, 255, 255, 0.1);
   --btn-text: #0f172a;
 
-  /* Dashboard Dark Theme */
-  --dash-pharma-bg: radial-gradient(circle at 30% 50%, #1e293b, var(--pharmacy-blue));
-  --dash-pharma-sidebar: rgba(15, 23, 42, 0.8);
-  --dash-client-bg: radial-gradient(circle at 70% 30%, var(--client-light), var(--client-mint));
-  --dash-client-sidebar: rgba(6, 78, 59, 0.8);
+  /* Status colors dark */
+  --danger: #f87171;
+  --success: #34d399;
+  --purple: #a78bfa;
+  --warning: #facc15;
 
-  --dash-text: #ffffff;
-  --dash-text-muted: rgba(255, 255, 255, 0.7);
+  /* Dashboard Dark Theme */
+  --dash-pharma-bg: #0f172a;
+  --dash-pharma-sidebar: #1e293b;
+  --dash-client-bg: #0f172a;
+  --dash-client-sidebar: #1e293b;
+
+  --dash-text: #f8fafc;
+  --dash-text-muted: rgba(255, 255, 255, 0.6);
   --dash-border: rgba(255, 255, 255, 0.1);
-  --dash-card: rgba(255, 255, 255, 0.05);
-  --dash-card-hover: rgba(255, 255, 255, 0.1);
+  --dash-card: rgba(30, 41, 59, 0.8);
+  --dash-card-hover: rgba(30, 41, 59, 1);
+
+  /* Brand colors for dark mode */
+  --pharmacy-blue: #0f172a;
+  --client-mint: #064e3b;
 }
 
 * {
@@ -106,4 +122,105 @@ h3 {
 .isometric-container {
   perspective: var(--perspective);
   transform-style: preserve-3d;
+}
+/* Dashboard Light Mode - Force overrides */
+:root:not([data-theme='dark']) .nav-item {
+  color: #64748b !important;
+}
+
+:root:not([data-theme='dark']) .section-container {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+:root:not([data-theme='dark']) .stat-card {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+:root:not([data-theme='dark']) .dashboard-sidebar {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+:root:not([data-theme='dark']) .dashboard-container {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+:root:not([data-theme='dark']) .stat-value,
+:root:not([data-theme='dark']) .stat-label {
+  color: inherit;
+}
+
+:root:not([data-theme='dark']) table th {
+  color: #64748b !important;
+  background: #f8fafc;
+}
+
+:root:not([data-theme='dark']) table td {
+  color: #0f172a !important;
+}
+
+:root:not([data-theme='dark']) .section-header h2 {
+  color: #0f172a !important;
+}
+
+/* ULTIMATE Light Mode Override - these MUST win */
+:root:not([data-theme='dark']) .nav-item {
+  color: #64748b !important;
+}
+
+:root:not([data-theme='dark']) .nav-item:hover {
+  background-color: #ffffff !important;
+  color: #38bdf8 !important;
+}
+
+:root:not([data-theme='dark']) .section-container {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+:root:not([data-theme='dark']) .stat-card {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+:root:not([data-theme='dark']) .dashboard-sidebar {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+:root:not([data-theme='dark']) .dashboard-container {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+:root:not([data-theme='dark']) .sidebar-brand {
+  color: #34d399 !important;
+}
+
+:root:not([data-theme='dark']) table th {
+  color: #64748b !important;
+  background: #f8fafc !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+:root:not([data-theme='dark']) table td {
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+:root:not([data-theme='dark']) .section-header h2 {
+  color: #0f172a !important;
+}
+
+:root:not([data-theme='dark']) .stat-value {
+  color: #0f172a !important;
+}
+
+:root:not([data-theme='dark']) .stat-label {
+  color: #64748b !important;
 }

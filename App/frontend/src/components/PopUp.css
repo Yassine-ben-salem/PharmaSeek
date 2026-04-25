@@ -198,8 +198,35 @@
 }
 
 .popup--error .popup__progress {
-  background: linear-gradient(90deg, #ef4444, #f87171);
+  background: linear-gradient(90deg, #dc2626, #f87171);
   box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+/* ── ℹ️  INFO ── */
+.popup--info {
+  background: linear-gradient(135deg,
+      rgba(59, 130, 246, 0.18) 0%,
+      rgba(59, 130, 246, 0.10) 100%);
+  border-color: rgba(59, 130, 246, 0.35);
+  color: #fef2f2;
+}
+
+.popup--info .popup__icon {
+  background: rgba(59, 130, 246, 0.22);
+  color: #60a5fa;
+}
+
+.popup--info .popup__label {
+  color: #93c5fd;
+}
+
+.popup--info .popup__close {
+  color: #93c5fd;
+}
+
+.popup--info .popup__progress {
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
 }
 
 /* ══════════════════════════════════════════
@@ -242,6 +269,19 @@
 
 [data-theme='light'] .popup--error .popup__close {
   color: #dc2626;
+}
+
+[data-theme='light'] .popup--info {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(59, 130, 246, 0.06));
+  color: #1e3a8a;
+}
+
+[data-theme='light'] .popup--info .popup__label {
+  color: #2563eb;
+}
+
+[data-theme='light'] .popup--info .popup__close {
+  color: #2563eb;
 }
 
 /* ── Box shadow adjustments for light mode ── */

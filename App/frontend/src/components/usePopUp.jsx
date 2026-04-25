@@ -17,6 +17,7 @@ const usePopUp = () => {
     valid: (message, duration) => addPopUp({ type: 'valid', message, duration }),
     warning: (message, duration) => addPopUp({ type: 'warning', message, duration }),
     error: (message, duration) => addPopUp({ type: 'error', message, duration }),
+    info: (message, duration) => addPopUp({ type: 'info', message, duration }),
   };
 
   return { popups, popup, addPopUp, remove };

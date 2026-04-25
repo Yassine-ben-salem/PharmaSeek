@@ -50,23 +50,29 @@ class ApiClient {
    */
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
-    const headers = this.getAuthHeaders();
+    
+    const isFormData = options.body instanceof FormData;
+    
+    const headers = {
+      ...(isFormData ? {} : this.getAuthHeaders()),
+      ...options.headers,
+    };
 
     try {
       const response = await fetch(url, {
         ...options,
-        headers: {
-          ...headers,
-          ...options.headers,
-        },
-        credentials: 'include', // Include cookies for refresh token
+        headers,
+        credentials: 'include',
       });
 
-      // Handle 401 - Unauthorized (token expired)
+      // Handle 401 - Unauthorized (only redirect if not login endpoint)
       if (response.status === 401) {
-        this.setAccessToken(null);
-        window.location.href = '/login';
-        throw new Error('Session expired. Please login again.');
+        // Don't redirect for login endpoint - let it show the error
+        if (!url.includes('/auth/login')) {
+          this.setAccessToken(null);
+          window.location.href = '/login';
+        }
+        throw new Error('Invalid credentials.');
       }
 
       // Handle response
@@ -103,14 +109,18 @@ class ApiClient {
     });
   }
 
-  /**
-   * POST request
-   */
+/**
+    * POST request
+    */
   post(endpoint, body, options = {}) {
+    const isFormData = body instanceof FormData;
     return this.request(endpoint, {
       ...options,
       method: 'POST',
-      body: JSON.stringify(body),
+      body: isFormData ? body : JSON.stringify(body),
+      headers: isFormData 
+        ? { ...options.headers }  // Let browser set Content-Type for FormData
+        : { ...this.getAuthHeaders(), ...options.headers },
     });
   }
 

@@ -5,7 +5,7 @@ import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import  usePopUp  from '../components/usePopUp';
+import useGlobalPopup, { showPopup } from '../components/PopupContext';
 import './Auth.css';
 
 const LoginPage = () => {
@@ -16,37 +16,32 @@ const LoginPage = () => {
     
     const navigate = useNavigate();
     const { login } = useAuth();
-    const {popup} = usePopUp();
+    const {popup} = useGlobalPopup();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
         if (!email || !password) {
-            popup.error('Please fill in all fields');
+            window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'error', message: 'Please fill in all fields', duration: 3000 } }));
             return;
         }
 
-        setIsLoading(true);
         try {
             const response = await login(email, password);
             
-            if (response.user) {
-                popup.valid('Login successful!');
-                
+            if (response && response.user) {
                 const userRole = response.user.role;
-                if (userRole === 'CLIENT') {
-                    window.location.href = '/client';
-                } else if (userRole === 'PHARMACY') {
-                    window.location.href = '/pharmacy';
-                } else {
-                    window.location.href = '/';
-                }
+                const redirectPath = userRole === 'CLIENT' ? '/client' : userRole === 'PHARMACY' ? '/pharmacy' : '/admin';
+                
+                window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'valid', message: 'Login successful!', duration: 1500 } }));
+                
+                setTimeout(() => {
+                    window.location.href = redirectPath;
+                }, 1500);
             }
         } catch (error) {
-            console.error('Login error:', error);
-            popup.error(error.message || 'Login failed. Please check your credentials.');
-        } finally {
-            setIsLoading(false);
+            const msg = error.message || 'Invalid email or password';
+            window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'error', message: msg, duration: 4000 } }));
         }
     };
 
