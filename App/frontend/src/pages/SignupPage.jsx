@@ -140,11 +140,17 @@ const SignupPage = () => {
             await signup(userData, role);
             
             if (role === 'pharmacy') {
-                window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'valid', message: 'Your request has been submitted! You will receive an email with the decision within 24 hours.', duration: 4000 } }));
+                window.dispatchEvent(new CustomEvent('show-popup', { 
+                    detail: { 
+                        type: 'valid', 
+                        message: 'Your request submitted! You will receive an email within 24 hours.', 
+                        duration: 5000 
+                    } 
+                }));
                 navigate('/login');
             } else {
-                window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'valid', message: 'Account created successfully! Please login.', duration: 4000 } }));
-                navigate('/login');
+                window.dispatchEvent(new CustomEvent('show-popup', { detail: { type: 'valid', message: 'Account created successfully!', duration: 4000 } }));
+                setTimeout(() => navigate('/login'), 1500);
             }
         } catch (error) {
             console.error('Signup error:', error);

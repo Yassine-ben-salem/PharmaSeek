@@ -72,7 +72,7 @@ class ApiClient {
           this.setAccessToken(null);
           window.location.href = '/login';
         }
-        throw new Error('Invalid credentials or session expired.');
+        throw new Error('Invalid credentials.');
       }
 
       // Handle response

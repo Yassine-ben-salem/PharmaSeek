@@ -270,7 +270,7 @@ const PharmacyDashboard = () => {
                         </div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171' }}>
+                        <div className="stat-icon" style={{ background: 'rgba(239, 68, 68, 0.2)', color: 'var(--danger, #f87171)' }}>
                             <AlertTriangle size={24} />
                         </div>
                         <div className="stat-info">
@@ -279,7 +279,7 @@ const PharmacyDashboard = () => {
                         </div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34d399' }}>
+                        <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.2)', color: 'var(--success, #34d399)' }}>
                             <CalendarCheck size={24} />
                         </div>
                         <div className="stat-info">
@@ -288,11 +288,11 @@ const PharmacyDashboard = () => {
                         </div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-icon" style={{ background: 'rgba(139, 92, 246, 0.2)', color: '#a78bfa' }}>
+                        <div className="stat-icon" style={{ background: 'rgba(139, 92, 246, 0.2)', color: 'var(--purple, #a78bfa)' }}>
                             <TrendingUp size={24} />
                         </div>
                         <div className="stat-info">
-                            <div className="stat-value">€{totalGained.toFixed(2)}</div>
+                            <div className="stat-value">{totalGained.toFixed(2)} TDN</div>
                             <div className="stat-label">Total Gained Today</div>
                         </div>
                     </div>
@@ -444,7 +444,7 @@ const PharmacyDashboard = () => {
                                         {item.quantity}
                                     </span>
                                 </td>
-                                <td>€{item.price}</td>
+                                <td>{item.price} TDN</td>
                                 <td>{item.reservationDelayMinutes || 24}h</td>
                                 <td>
                                     <div className="action-btns">
@@ -789,7 +789,7 @@ const PharmacyDashboard = () => {
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label>Price (€) *</label>
+                                        <label>Price (TDN) *</label>
                                         <input
                                             type="number"
                                             step="0.01"

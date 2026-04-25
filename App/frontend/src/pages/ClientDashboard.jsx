@@ -385,7 +385,7 @@ const handleCancelReservation = async (reservationId) => {
                     </div>
                 </div>
                 <div className="stat-card">
-                    <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
+                    <div className="stat-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-secondary)' }}>
                         <CheckCircle2 size={24} />
                     </div>
                     <div className="stat-info">
@@ -397,7 +397,7 @@ const handleCancelReservation = async (reservationId) => {
                      onMouseEnter={() => setIsNearbyHovered(true)}
                      onMouseLeave={() => setIsNearbyHovered(false)}
                      style={{ position: 'relative', cursor: 'pointer', zIndex: isNearbyHovered ? 999 : 10 }}>
-                    <div className="stat-icon" style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>
+                    <div className="stat-icon" style={{ background: 'rgba(139, 92, 246, 0.1)', color: 'var(--purple, #8b5cf6)' }}>
                         <MapPin size={24} />
                     </div>
                     <div className="stat-info">

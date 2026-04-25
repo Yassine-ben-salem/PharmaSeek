@@ -154,7 +154,6 @@ const AdminDashboard = () => {
         { id: 'users', icon: Users, label: 'Users' },
         { id: 'reservations', icon: CalendarCheck, label: 'Reservations' },
         { id: 'drugs', icon: Pill, label: 'Drugs' },
-        { id: 'settings', icon: Settings, label: 'Settings' },
     ];
 
 const renderDashboard = () => {
@@ -248,13 +247,13 @@ const renderDashboard = () => {
                 <div className="section-header">
                     <h2>Pending Pharmacy Approvals</h2>
                     <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
-                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)' }} />
+                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-text-muted)' }} />
                         <input
                             type="text"
                             placeholder="Search pharmacies..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', border: '1px solid var(--dash-border)', background: 'var(--dash-card)', color: 'var(--dash-text)' }}
+                            style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', border: '1px solid var(--admin-border)', background: 'var(--admin-card)', color: 'var(--admin-text)' }}
                         />
                     </div>
                 </div>
@@ -319,13 +318,13 @@ const renderDashboard = () => {
                 <div className="section-header">
                     <h2>All Users</h2>
                     <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
-                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)' }} />
+                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-text-muted)' }} />
                         <input
                             type="text"
                             placeholder="Search users..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', border: '1px solid var(--dash-border)', background: 'var(--dash-card)', color: 'var(--dash-text)' }}
+                            style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', border: '1px solid var(--admin-border)', background: 'var(--admin-card)', color: 'var(--dash-text)' }}
                         />
                     </div>
                 </div>
@@ -386,13 +385,13 @@ const renderDashboard = () => {
                 <div className="section-header">
                     <h2>All Reservations</h2>
                     <div className="search-bar" style={{ position: 'relative', width: '300px' }}>
-                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--dash-text-muted)' }} />
+                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--admin-text-muted)' }} />
                         <input
                             type="text"
                             placeholder="Search reservations..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', border: '1px solid var(--dash-border)', background: 'var(--dash-card)', color: 'var(--dash-text)' }}
+                            style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.5rem', borderRadius: '10px', border: '1px solid var(--admin-border)', background: 'var(--admin-card)', color: 'var(--dash-text)' }}
                         />
                     </div>
                 </div>
