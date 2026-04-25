@@ -229,7 +229,7 @@ const renderDashboard = () => {
                         <TrendingUp size={24} />
                     </div>
                     <div className="stat-info">
-                        <div className="stat-value" style={{ color: textColor }}>{stats.totalRevenue} DH</div>
+                        <div className="stat-value" style={{ color: textColor }}>{stats.totalRevenue} TDN</div>
                         <div className="stat-label" style={{ color: mutedColor }}>Total Revenue</div>
                     </div>
                 </div>
@@ -417,7 +417,7 @@ const renderDashboard = () => {
                                         <td><strong>{r.id}</strong></td>
                                         <td>{r.clientName || 'N/A'}</td>
                                         <td>{r.pharmacyName || 'N/A'}</td>
-                                        <td>{r.totalPrice} DH</td>
+                                        <td>{r.totalPrice} TDN</td>
                                         <td>
                                             <span className={`badge badge-${r.status?.toLowerCase() || 'info'}`}>
                                                 {r.status}

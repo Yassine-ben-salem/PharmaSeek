@@ -290,7 +290,7 @@ const SignupPage = () => {
                                     className="btn-submit"
                                     onClick={getCurrentLocation}
                                     disabled={isGettingLocation}
-                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: latitude ? 'var(--success, #4caf50)' : 'var(--primary)' }}
+                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: latitude ? 'var(--success, #4caf50)' : 'var(--primary)', color: 'var(--text-primary)' }}
                                 >
                                     <Navigation size={18} />
                                     {isGettingLocation ? 'Getting Location...' : latitude ? `Location Set: ${latitude}, ${longitude}` : 'Get Current Location (Required)'}
