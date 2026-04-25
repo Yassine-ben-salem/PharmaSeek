@@ -626,7 +626,7 @@ const handleCancelReservation = async (reservationId) => {
                     ) : (
                         <div className="search-results-grid">
                             <div style={{ margin: '1rem 0', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                <button className="btn btn-secondary" onClick={() => setSelectedDrug(null)} style={{ padding: '0.5rem 1rem' , color: 'var(--text-secondary)'}}>
+                                <button className="btn btn-secondary" onClick={() => setSelectedDrug(null)} style={{ padding: '0.5rem 1rem' ,color: 'black'}}>
                                     Back
                                 </button>
                                 <h3>Pharmacies with "{selectedDrug.name}" in stock:</h3>
