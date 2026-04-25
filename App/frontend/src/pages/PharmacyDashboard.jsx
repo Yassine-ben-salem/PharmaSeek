@@ -218,7 +218,15 @@ const PharmacyDashboard = () => {
         try {
             await reservationService.updateReservationStatus(reservationId, status);
             popup.valid('Reservation status updated!');
-            window.location.reload();
+            
+            if (status === 'CONFIRMED' || status === 'DONE' || status === 'CANCELLED') {
+                const [inventory, reservations] = await Promise.all([
+                    pharmacyStockService.getMyInventory(),
+                    reservationService.getMyReservations()
+                ]);
+                setInventoryData(inventory || []);
+                setReservationsData(reservations || []);
+            }
         } catch (error) {
             popup.error('Failed to update status: ' + error.message);
         }

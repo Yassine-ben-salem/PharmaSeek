@@ -583,15 +583,13 @@ const renderDashboard = () => {
                                     onChange={(e) => setNewDrug({ ...newDrug, manufacturer: e.target.value })}
                                 />
                             </div>
-                            <div className="form-group checkbox">
-                                <label>
+                            <div className='nanananaan'>
                                     <input
                                         type="checkbox"
                                         checked={newDrug.requiresPrescription}
                                         onChange={(e) => setNewDrug({ ...newDrug, requiresPrescription: e.target.checked })}
                                     />
-                                    Requires Prescription
-                                </label>
+                                    <span className="checkbox-label-text">Requires Prescription</span>
                             </div>
                             <div className="modal-actions">
                                 <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>Cancel</button>
