@@ -37,6 +37,9 @@ public class DrugService {
         Drug drug = drugMapper.toDrug(drugDto);
         drug.setCreatedAt(Instant.now());
         drug.setUpdatedAt(Instant.now());
+        if (drugDto.getRequiresPrescription() == null) {
+            drug.setRequiresPrescription(false);
+        }
         Drug savedDrug = drugRepository.save(drug);
         return drugMapper.toDrugDto(savedDrug);
     }
@@ -46,6 +49,9 @@ public class DrugService {
                 .map(existingDrug -> {
                     existingDrug.setName(drugDto.getName());
                     existingDrug.setDescription(drugDto.getDescription());
+                    existingDrug.setCategory(drugDto.getCategory());
+                    existingDrug.setManufacturer(drugDto.getManufacturer());
+                    existingDrug.setBarCode(drugDto.getBarCode());
                     existingDrug.setRequiresPrescription(drugDto.getRequiresPrescription());
                     existingDrug.setUpdatedAt(Instant.now());
                     Drug updatedDrug = drugRepository.save(existingDrug);
@@ -60,11 +66,12 @@ public class DrugService {
         }
         return ResponseEntity.notFound().build();
     }
-    public ResponseEntity<DrugDto> getDrugByName(String name) {
-        return drugRepository.findByNameIgnoreCase(name)
+    public ResponseEntity<List<DrugDto>> getDrugByName(String name) {
+        List<DrugDto> drugs = drugRepository.findByNameContainingIgnoreCase(name)
+                .stream()
                 .map(drugMapper::toDrugDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(drugs);
     }
 
 }

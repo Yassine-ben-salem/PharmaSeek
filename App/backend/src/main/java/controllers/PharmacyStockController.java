@@ -1,5 +1,7 @@
 package controllers;
 
+import dtos.CreateStockWithDrugRequest;
+import dtos.DrugDto;
 import dtos.PharmacyStockDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -26,6 +28,12 @@ public class PharmacyStockController {
         return ResponseEntity.ok(pharmacyStockService.getAllPharmacyStock());
     }
 
+    @GetMapping("")
+    @PreAuthorize("hasAnyRole('PHARMACY')")
+    public ResponseEntity<List<PharmacyStockDto>> getMyPharmacyStock(Authentication authentication) {
+        return ResponseEntity.ok(pharmacyStockService.getMyPharmacyStock(authentication));
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','PHARMACY')")
     public ResponseEntity<PharmacyStockDto> getPharmacyStockById(@PathVariable Long id, Authentication authentication) {
@@ -42,6 +50,16 @@ public class PharmacyStockController {
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(pharmacyStockService.createPharmacyStock(pharmacyStockDto, authentication));
+    }
+
+    @PostMapping("/with-drug")
+    @PreAuthorize("hasAnyRole('PHARMACY','ADMIN')")
+    public ResponseEntity<PharmacyStockDto> createPharmacyStockWithDrug(
+            @RequestBody CreateStockWithDrugRequest request,
+            Authentication authentication
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(pharmacyStockService.createPharmacyStockWithNewDrug(request.getStock(), request.getDrug(), authentication));
     }
 
     @PutMapping("/{id}")
@@ -75,11 +93,27 @@ public class PharmacyStockController {
     }
 
     @GetMapping("/drug/{drugId}")
-    @PreAuthorize("hasAnyRole('ADMIN','PHARMACY')")
+    @PreAuthorize("hasAnyRole('ADMIN','PHARMACY','CLIENT')")
     public ResponseEntity<List<PharmacyStockDto>> getPharmacyStockByDrugId(
             @PathVariable Long drugId,
             Authentication authentication
     ) {
         return ResponseEntity.ok(pharmacyStockService.getPharmacyStockByDrugId(drugId, authentication));
+    }
+
+    @GetMapping("/autocomplete")
+    public ResponseEntity<List<DrugDto>> autocompleteDrugs(@RequestParam String name) {
+        return ResponseEntity.ok(pharmacyStockService.autocompleteDrugs(name));
+    }
+
+    @GetMapping("/nearby/{drugId}")
+    @PreAuthorize("hasAnyRole('CLIENT', 'PHARMACY', 'ADMIN')")
+    public ResponseEntity<List<PharmacyStockDto>> getNearbyPharmacies(
+            @PathVariable Long drugId,
+            @RequestParam Double latitude,
+            @RequestParam Double longitude,
+            Authentication authentication
+    ) {
+        return ResponseEntity.ok(pharmacyStockService.getNearbyPharmaciesWithDrug(drugId, latitude, longitude, 5.0));
     }
 }

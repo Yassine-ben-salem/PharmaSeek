@@ -85,6 +85,12 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getMyReservationById(id, authentication));
     }
 
+    @GetMapping("/pharmacy/me")
+    @PreAuthorize("hasAnyRole('PHARMACY')")
+    public ResponseEntity<List<ReservationDto>> getMyPharmacyReservations(Authentication authentication) {
+        return ResponseEntity.ok(reservationService.getPharmacyReservationsForPharmacy(authentication));
+    }
+
     @GetMapping("/pharmacy/{pharmacyId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'PHARMACY')")
     public ResponseEntity<List<ReservationDto>> getReservationsByPharmacyId(@PathVariable Long pharmacyId) {
